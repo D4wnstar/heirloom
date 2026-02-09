@@ -38,7 +38,7 @@
 				{#if child.type === 'folder'}
 					<TreeFolder folder={child} {saveExpandedStates} />
 				{:else}
-					<TreeFile title={child.alt_title ?? child.title} route={child.route} />
+					<TreeFile title={child.title} route={child.route} />
 				{/if}
 			</li>
 		{/each}

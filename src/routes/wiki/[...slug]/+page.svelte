@@ -8,12 +8,12 @@
 
 	let { data } = $props()
 
-	let headTitle = $derived(`${data.note.title} - ${data.settings.title}`)
+	let headTitle = $derived(`${data.title} - ${data.settings.title}`)
 
 	// Get breadcrumbs while respecting alt titles
 	let breadcrumbs = $derived.by(() => {
-		const crumbs = data.note.path.split('/')
-		crumbs[crumbs.length - 1] = data.note.title
+		const crumbs = data.path.split('/')
+		crumbs[crumbs.length - 1] = data.title
 		return crumbs
 	})
 
@@ -87,7 +87,7 @@
 
 	// Update page content every time it changes
 	$effect(() => {
-		data.note.html_content
+		data.content
 		initializeCollapsibleCallouts()
 		initializeImageModals()
 		//@ts-expect-error provided by the global mermaid script
@@ -111,18 +111,18 @@
 	<div class="hidden w-full overflow-y-hidden overflow-x-scroll lg:block">
 		<Breadcrumbs {breadcrumbs} />
 	</div>
-	<h1 class="h1 text-center">{data.note.title}</h1>
+	<h1 class="h1 text-center">{data.title}</h1>
 	<hr class="hr" />
 	<article id="content" class="pre-html space-y-4">
-		{#key data.note.html_content}
-			{@html data.note.html_content}
+		{#key data.content}
+			{@html data.content}
 		{/key}
 	</article>
 	<hr class="hr" />
 </main>
 
-<aside class="hidden w-[360px] [@media(min-width:1400px)]:block">
+<!-- <aside class="hidden w-[360px] [@media(min-width:1400px)]:block">
 	{#if data.sidebarImages.length > 0 || data.details.length > 0}
 		<Extras sidebarImages={data.sidebarImages} details={data.details} />
 	{/if}
-</aside>
+</aside> -->

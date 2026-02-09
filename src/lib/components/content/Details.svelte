@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { DetailsRow } from '$lib/schema'
+	import type { DetailsData } from '$lib/types'
 	import { Library } from 'lucide-svelte'
 
 	interface Props {
-		details: DetailsRow[]
+		details: DetailsData[]
 	}
 
 	let { details }: Props = $props()

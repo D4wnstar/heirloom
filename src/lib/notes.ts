@@ -10,42 +10,24 @@ export function slugPath(path: string): string {
 	return slugged.join('/')
 }
 
-export type Folder = {
-	type: 'folder'
+export interface PageMetadata {}
+
+interface TreeNode {
+	type: 'folder' | 'file'
 	title: string
 	path: string
-	children: Tree
-	expanded: boolean
+	children?: TreeNode[]
+	expanded?: boolean
 }
 
-export type File = {
-	type: 'file'
-	title: string
-	search_terms: string[]
-	path: string
-	route: string
-	alt_title?: string | null | undefined
-}
-
-export type Tree = (File | Folder)[]
-
-export type NoteMeta = {
-	title: string
-	route: string
-	path: string
-	search_terms: string
-}
-
-export function createNavTree(pages: NoteMeta[]) {
-	const files: File[] = pages.map((p) => {
-		return {
-			type: 'file',
-			search_terms: p.search_terms.split(';').map((t) => t.trim()),
-			path: p.path,
-			route: p.route,
-			title: p.title
-		}
-	})
+export function createNavTree(pages: PageMetadata[]) {
+	const files: File[] = pages.map((p) => ({
+		type: 'file',
+		path: p.path,
+		route: p.route,
+		title: p.title,
+		aliases: p.aliases
+	}))
 
 	const root: Folder = {
 		type: 'folder',

@@ -2,7 +2,7 @@
 	import '../app.css'
 	import '../prism-laserwave.css'
 	import { AppBar, Modal } from '@skeletonlabs/skeleton-svelte'
-	import { Menu, UserCircle, X } from 'lucide-svelte'
+	import { Menu, X } from 'lucide-svelte'
 	import Lightswitch from '$lib/components/utils/Lightswitch.svelte'
 	import Navigation from '$lib/components/navigation/Navigation.svelte'
 
@@ -28,7 +28,7 @@
 			<button class="btn-icon-lg self-start" onclick={drawerClose}>
 				<X />
 			</button>
-			<Navigation pages={data.pages} allowLogins={data.settings.allow_logins} />
+			<Navigation pages={data.pageMetadata} />
 		</div>
 	{/snippet}
 </Modal>
@@ -47,11 +47,6 @@
 		</a>
 	{/snippet}
 	{#snippet trail()}
-		{#if data.settings.allow_logins}
-			<a href={data.user ? '/account' : '/login'}>
-				<UserCircle />
-			</a>
-		{/if}
 		<Lightswitch />
 	{/snippet}
 </AppBar>
@@ -60,7 +55,7 @@
 	<nav
 		class="sticky top-4 hidden max-h-[85vh] w-[360px] space-y-3 self-start [@media(min-width:1200px)]:flex [@media(min-width:1200px)]:flex-col [@media(min-width:1200px)]:gap-1"
 	>
-		<Navigation pages={data.pages} allowLogins={data.settings.allow_logins} />
+		<Navigation pages={data.pageMetadata} />
 	</nav>
 
 	{@render children()}

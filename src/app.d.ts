@@ -2,15 +2,12 @@
 // for information about these interfaces
 // and what to do when importing types
 
-import type { LoggedUser } from '$lib/types'
+import type { LoggedUser } from '$lib/utils'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 
 declare global {
 	namespace App {
-		interface Locals {
-			db: LibSQLDatabase
-			user: LoggedUser | null
-		}
+		// interface Locals {}
 		// interface PageData {}
 		// interface Error {}
 		// interface Platform {}

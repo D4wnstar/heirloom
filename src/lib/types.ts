@@ -1,8 +1,13 @@
-export type LoggedUser = {
-	id: number
-	username: string
-	iat: number
-	exp: number
+export interface DetailsData {
+	key: string
+	value: string
 }
 
-export type LoadedImage = { url: string; caption: string | null }
+export interface SidebarImageData {
+	path: string
+	caption: string
+}
+
+export interface WikiSettings {
+	title: string
+}

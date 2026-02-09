@@ -1,30 +1,25 @@
-import { TURSO_AUTH_TOKEN, TURSO_URL } from '$env/static/private'
 import { handlePageSlug } from '$lib/loading'
-import { drizzle } from 'drizzle-orm/libsql'
+import { ASSETS_FOLDER } from '$lib/utils'
 import type { EntryGenerator, PageServerLoad } from './$types'
-import { notes } from '$lib/schema'
-import { eq } from 'drizzle-orm'
+import { readdirSync } from 'fs'
 
-export const load = (async ({ locals: { db, user }, params: { slug } }) => {
-	const page = await handlePageSlug(db, user, slug)
-	return { user, ...page }
+export const load = (async ({ params: { slug } }) => {
+	return handlePageSlug(slug)
 }) satisfies PageServerLoad
 
-export const prerender = 'auto'
 export const entries: EntryGenerator = async () => {
-	const db = drizzle({
-		connection: {
-			url: TURSO_URL,
-			authToken: TURSO_AUTH_TOKEN
-		}
-	})
+	// Each slug is the filename without the file extensions
+	// TODO: Handle disambiguation of files with the same name
+	const slugs = readdirSync(ASSETS_FOLDER, { recursive: true, encoding: 'utf-8' })
+		// Filter out hidden files and folders
+		.filter((a) => !a.split('/').some((part) => part.startsWith('.')))
+		// Grab the filename/dirname only
+		.map((a) => a.split('/').at(-1)!)
+		// Filter for .md files only
+		.filter((a) => a.endsWith('.md'))
+		.map((a) => ({ slug: a.replace('.md', '').replaceAll(' ', '_') }))
 
-	const prerenderableSlugs = await db
-		.select({
-			slug: notes.route
-		})
-		.from(notes)
-		.where(eq(notes.can_prerender, true))
+	console.log('SLUGS:', slugs)
 
-	return prerenderableSlugs
+	return slugs
 }

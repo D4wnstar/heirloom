@@ -3,12 +3,6 @@ import { defineConfig } from 'vite'
 
 export default defineConfig(({ mode }) => ({
 	plugins: [sveltekit()],
-	server: {
-		https: {
-			cert: './localhost.pem',
-			key: './localhost-key.pem'
-		}
-	},
 	resolve: {
 		alias: {
 			// Workaround to get KaTeX fonts to load correctly in both dev and production

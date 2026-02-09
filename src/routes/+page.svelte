@@ -7,8 +7,7 @@
 	// (remove Breadcrumbs from front page)
 
 	let { data } = $props()
-	const pageTitle = $derived(data.note.title)
-	const headTitle = $derived(`${pageTitle} - ${data.settings.title}`)
+	let headTitle = $derived(`${data.title} - ${data.settings.title}`)
 
 	// Store references to event listeners for cleanup
 	let eventListeners: Array<{ element: HTMLElement; handler: EventListener }> = []
@@ -47,7 +46,7 @@
 		document.querySelectorAll('#content img').forEach((el) => {
 			const img = el as HTMLImageElement
 			const url = img.src
-			const caption = img.getAttribute('data-caption') ?? null
+			const caption = img.getAttribute('data-caption') ?? ''
 			const classes = img.className ?? undefined
 			const width = img.getAttribute('width') ?? undefined
 
@@ -80,7 +79,7 @@
 
 	// Update page content every time it changes
 	$effect(() => {
-		data.note.html_content
+		data.content
 		initializeCollapsibleCallouts()
 		initializeImageModals()
 		//@ts-expect-error provided by the global mermaid script
@@ -101,18 +100,18 @@
 </svelte:head>
 
 <main class="mx-auto flex max-w-3xl flex-col space-y-6 lg:grow lg:px-8">
-	<h1 class="h1 text-center">{data.note.title}</h1>
+	<h1 class="h1 text-center">{data.title}</h1>
 	<hr class="hr" />
 	<article id="content" class="pre-html space-y-4">
-		{#key data.note.html_content}
-			{@html data.note.html_content}
+		{#key data.content}
+			{@html data.content}
 		{/key}
 	</article>
 	<hr class="hr" />
 </main>
 
-<aside class="hidden w-[360px] [@media(min-width:1400px)]:block">
+<!-- <aside class="hidden w-[360px] [@media(min-width:1400px)]:block">
 	{#if data.sidebarImages.length > 0 || data.details.length > 0}
 		<Extras sidebarImages={data.sidebarImages} details={data.details} />
 	{/if}
-</aside>
+</aside> -->

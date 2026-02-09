@@ -3,17 +3,16 @@
 		createNavTree,
 		sortFolderRecursively,
 		type Folder,
-		type NoteMeta,
+		type PageMetadata,
 		type Tree
 	} from '$lib/notes'
 	import { Popover } from '@skeletonlabs/skeleton-svelte'
 	import TreeFile from './TreeFile.svelte'
 	import TreeFolder from './TreeFolder.svelte'
-	import { onDestroy, onMount } from 'svelte'
+	import { onMount } from 'svelte'
 	import { browser } from '$app/environment'
-	import { API } from '$lib/api'
 
-	let { pages, allowLogins }: { pages: NoteMeta[]; allowLogins: boolean } = $props()
+	let { pages }: { pages: PageMetadata[] } = $props()
 
 	let root: Tree = $state([])
 	let searchQuery = $state('')
@@ -28,43 +27,11 @@
 	onMount(async () => {
 		loadExpandedStates(root)
 
-		// Listen for login events if the wiki permits it
-		if (!browser || !allowLogins) return
-
-		const secrets = await API.secretPages()
-		const tree = createNavTree([...pages, ...secrets])
-		sortFolderRecursively(tree)
-		root = tree.children
-		loadExpandedStates(root)
-
-		window.addEventListener('userLogin', handleLogin)
-		window.addEventListener('userLogout', handleLogout)
-	})
-
-	onDestroy(() => {
-		if (!browser || !allowLogins) return
-		window.removeEventListener('userLogin', handleLogin)
-		window.removeEventListener('userLogout', handleLogout)
-	})
-
-	// Reset tree with secret pages on login
-	async function handleLogin() {
-		const secrets = await API.secretPages()
-		if (secrets.length > 0) {
-			const tree = createNavTree([...pages, ...secrets])
-			sortFolderRecursively(tree)
-			root = tree.children
-			loadExpandedStates(root)
-		}
-	}
-
-	// Reset tree with no secrets on logout
-	function handleLogout() {
 		const tree = createNavTree(pages)
 		sortFolderRecursively(tree)
 		root = tree.children
 		loadExpandedStates(root)
-	}
+	})
 
 	function saveExpandedStates() {
 		if (!browser) return
@@ -109,9 +76,9 @@
 		for (const obj of tree.children) {
 			if (
 				obj.type === 'file' &&
-				obj.search_terms.some((term) => term.toLocaleLowerCase().includes(searchTerm))
+				obj.aliases.some((term) => term.toLocaleLowerCase().includes(searchTerm))
 			) {
-				namePathPairs.push({ title: obj.alt_title ?? obj.title, route: obj.route })
+				namePathPairs.push({ title: obj.title, route: obj.route })
 				continue
 			}
 
@@ -181,7 +148,7 @@
 			{#if root[idx].type === 'folder'}
 				<TreeFolder bind:folder={root[idx]} {saveExpandedStates} />
 			{:else}
-				<TreeFile title={root[idx].alt_title ?? root[idx].title} route={root[idx].route} />
+				<TreeFile title={root[idx].title} route={root[idx].route} />
 			{/if}
 		</div>
 	{/each}
