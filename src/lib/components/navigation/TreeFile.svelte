@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Minus } from 'lucide-svelte'
 
-	let { title, route }: { title: string; route: string } = $props()
+	let { title, slug }: { title: string; slug: string } = $props()
 </script>
 
-<a href={`/wiki/${route}`}>
+<a href={`/wiki/${slug}`}>
 	<button
 		class="group flex w-full flex-row items-center gap-2 py-1 duration-200 hover:!bg-opacity-80 hover:pl-2 hover:text-primary-800-200 hover:bg-surface-50-950 active:scale-95"
 	>

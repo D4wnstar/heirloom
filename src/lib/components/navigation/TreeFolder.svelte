@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Folder } from '$lib/notes'
+	import type { Folder } from '$lib/types'
 	import { ChevronDown } from 'lucide-svelte'
 	import TreeFile from './TreeFile.svelte'
 	import TreeFolder from './TreeFolder.svelte'
@@ -38,7 +38,7 @@
 				{#if child.type === 'folder'}
 					<TreeFolder folder={child} {saveExpandedStates} />
 				{:else}
-					<TreeFile title={child.title} route={child.route} />
+					<TreeFile title={child.title} slug={child.slug} />
 				{/if}
 			</li>
 		{/each}

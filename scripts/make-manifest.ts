@@ -1,11 +1,11 @@
-/*
+/**
 Go through the cloned assets to create a manifest containing useful
 information needed for the static generation.
 */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { assetsDir } from './utils.ts'
-import { join, relative } from 'path'
+import path, { join, relative } from 'path'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkFrontmatter from 'remark-frontmatter'
@@ -42,12 +42,16 @@ type Tree = (File | Folder)[]
 
 type WikiSettings = {
 	title: string
+	frontPage: {
+		slug: string
+		path: string
+	}
 }
 
 type Manifest = {
-	frontpageAbsolutePath: string
 	wikiSettings: WikiSettings
 	navTree: Tree
+	slugsToPath: Record<string, string>
 }
 
 // First pass: instantiate all directories to ensure parents exist before children
@@ -89,15 +93,23 @@ const processor = unified()
 	.use(() => (_, file) => matter(file))
 	.use(remarkStringify)
 
-let frontpageAbsPath: string | null = null
-
 // Initialize default settings
 const wikiSettings: WikiSettings = {
-	title: 'Awesome Wiki'
+	title: 'Awesome Wiki',
+	frontPage: { slug: '', path: '' }
 }
+const slugsToPath: Record<string, string> = {}
 
 for (const entry of entries) {
-	if (!entry.isFile() || !entry.name.endsWith('.md')) continue
+	// Skip hidden files and folders and anything that's not a markdown file
+	if (
+		entry.name.startsWith('.') ||
+		entry.parentPath.split(path.sep).some((p) => p.startsWith('.')) ||
+		!entry.isFile() ||
+		!entry.name.endsWith('.md')
+	) {
+		continue
+	}
 
 	const absPath = join(entry.parentPath, entry.name)
 	const relPath = relative(assetsDir, absPath)
@@ -105,13 +117,23 @@ for (const entry of entries) {
 
 	const content = readFileSync(absPath, { encoding: 'utf-8' })
 	const vfile = processor.processSync(content)
+	// TODO: Make an interface for the frontmatter
 	const frontmatter = vfile.data.matter as Record<string, any>
+
+	// Each slug is the filename without the file extensions, spaces to underscores
+	// and encoded to be URI safe
+	// For example, the file Docs/Blocks/Block Syntax.md would be
+	// slugged to Block_Syntax
+	// Slugs need to be unique
+	// TODO: Handle disambiguation of files with the same name
+	// TODO: Replace with path-to-slug function
+	const slug = entry.name.replace(/\.md$/, '').replaceAll(' ', '_')
 
 	const file: File = {
 		type: 'file',
 		title: entry.name.replace(/\.md$/, ''),
 		path: relPath,
-		slug: entry.name.replace(/\.md$/, '').replaceAll(' ', '_'), // TODO: Replace with path-to-slug function
+		slug,
 		aliases: frontmatter['aliases'] ?? []
 	}
 
@@ -123,8 +145,11 @@ for (const entry of entries) {
 		// All settings have defaults so this just updates them if needed
 		if (frontmatter['wiki-project-title']) wikiSettings.title = frontmatter['wiki-project-title']
 
-		// We also need to store the page's path for later
-		frontpageAbsPath = absPath
+		// Store the front page separately
+		wikiSettings.frontPage = { slug, path: relPath }
+	} else {
+		// Store normal pages for later
+		slugsToPath[slug] = relPath
 	}
 }
 
@@ -140,15 +165,15 @@ function sortTree(tree: Tree) {
 }
 sortTree(root.children)
 
-if (frontpageAbsPath == null) {
+if (wikiSettings.frontPage.path === '' || wikiSettings.frontPage.slug === '') {
 	console.error('Error: No front page is set. Cannot build the wiki without a front page')
 	process.exit(1)
 }
 
 // Aggregate everything and save
 const manifest: Manifest = {
-	frontpageAbsolutePath: frontpageAbsPath,
 	wikiSettings,
+	slugsToPath,
 	navTree: root.children
 }
 

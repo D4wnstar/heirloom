@@ -1,31 +1,21 @@
-import { error } from '@sveltejs/kit'
-import { readdirSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import { ASSETS_FOLDER } from './utils'
+import { join } from 'path'
 
 /**
  * Handle page slug by reading markdown file from the content directory
- * @param filename The filename of the markdown file (somewhere in the content directory)
+ * @param filepath The path to the markdown file (relative to the assets directory)
  * @returns The processed page object with HTML content
  */
-export function handlePageSlug(filename: string) {
-	// Get the path by finding the first file with the given name
-	// TODO: Disambiguation should probably be handled elsewhere
-	const files = readdirSync(ASSETS_FOLDER, { recursive: true, encoding: 'utf-8' }).filter((entry) =>
-		entry.endsWith('.md')
-	)
-	const filepath = files.find(
-		(entry) => entry.split('/').at(-1)!.replace('.md', '').replaceAll(' ', '_') == filename
-	)
-	if (!filepath) error(404, `No file called ${filename}. Skipping`)
-
-	const fullPath = `${ASSETS_FOLDER}/${filepath}`
+export function fetchPage(filepath: string) {
+	const fullPath = join(ASSETS_FOLDER, filepath)
 	console.log('PROCESSING:', fullPath)
 	const markdownContent = readFileSync(fullPath, 'utf-8')
 	const htmlContent = markdownToHtml(markdownContent)
 
 	return {
 		content: htmlContent,
-		title: filename.split('/').at(-1)?.replace('.md', '').replaceAll('_', ' ') ?? 'Placeholder',
+		title: filepath.split('/').at(-1)?.replace('.md', '').replaceAll('_', ' ') ?? 'Placeholder',
 		path: filepath
 	}
 }

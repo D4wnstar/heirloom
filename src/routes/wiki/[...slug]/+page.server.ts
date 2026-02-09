@@ -1,23 +1,27 @@
-import { handlePageSlug } from '$lib/loading'
-import { ASSETS_FOLDER } from '$lib/utils'
+import { fetchPage } from '$lib/loading'
+import type { Manifest } from '$lib/types'
+import { MANIFEST_PATH } from '$lib/utils'
+import { error } from '@sveltejs/kit'
 import type { EntryGenerator, PageServerLoad } from './$types'
-import { readdirSync } from 'fs'
+import { readFileSync } from 'fs'
 
-export const load = (async ({ params: { slug } }) => {
-	return handlePageSlug(slug)
+export const load = (async ({ params: { slug }, parent }) => {
+	const layoutData = await parent()
+	if (slug === layoutData.wikiSettings.frontPage.slug) {
+		error(400, 'Front page route is rendered separately as the root route "/"')
+	}
+
+	const path = layoutData.slugsToPath[slug]
+	if (!path) error(404, `No path found for slug ${slug}`)
+	return fetchPage(path)
 }) satisfies PageServerLoad
 
 export const entries: EntryGenerator = async () => {
-	// Each slug is the filename without the file extensions
-	// TODO: Handle disambiguation of files with the same name
-	const slugs = readdirSync(ASSETS_FOLDER, { recursive: true, encoding: 'utf-8' })
-		// Filter out hidden files and folders
-		.filter((a) => !a.split('/').some((part) => part.startsWith('.')))
-		// Grab the filename/dirname only
-		.map((a) => a.split('/').at(-1)!)
-		// Filter for .md files only
-		.filter((a) => a.endsWith('.md'))
-		.map((a) => ({ slug: a.replace('.md', '').replaceAll(' ', '_') }))
+	const manifest = readFileSync(MANIFEST_PATH, { encoding: 'utf-8' })
+	const manifestJson: Manifest = JSON.parse(manifest)
+	const slugs = Object.keys(manifestJson.slugsToPath).map((slug) => ({
+		slug
+	}))
 
 	console.log('SLUGS:', slugs)
 

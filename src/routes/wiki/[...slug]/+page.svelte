@@ -8,7 +8,7 @@
 
 	let { data } = $props()
 
-	let headTitle = $derived(`${data.title} - ${data.settings.title}`)
+	let headTitle = $derived(`${data.title} - ${data.wikiSettings.title}`)
 
 	// Get breadcrumbs while respecting alt titles
 	let breadcrumbs = $derived.by(() => {

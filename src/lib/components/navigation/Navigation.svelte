@@ -1,36 +1,19 @@
 <script lang="ts">
-	import {
-		createNavTree,
-		sortFolderRecursively,
-		type Folder,
-		type PageMetadata,
-		type Tree
-	} from '$lib/notes'
 	import { Popover } from '@skeletonlabs/skeleton-svelte'
 	import TreeFile from './TreeFile.svelte'
 	import TreeFolder from './TreeFolder.svelte'
 	import { onMount } from 'svelte'
 	import { browser } from '$app/environment'
+	import type { Tree } from '$lib/types'
 
-	let { pages }: { pages: PageMetadata[] } = $props()
+	let { tree }: { tree: Tree } = $props()
 
-	let root: Tree = $state([])
 	let searchQuery = $state('')
 	let popoverState = $state(false)
-	let autocompleteLinks: { title: string; route: string }[] = $state([])
-
-	// Initialize the tree with the provided pages
-	const tree = createNavTree(pages)
-	sortFolderRecursively(tree)
-	root = tree.children
+	let autocompleteLinks: { title: string; slug: string }[] = $state([])
 
 	onMount(async () => {
-		loadExpandedStates(root)
-
-		const tree = createNavTree(pages)
-		sortFolderRecursively(tree)
-		root = tree.children
-		loadExpandedStates(root)
+		loadExpandedStates(tree)
 	})
 
 	function saveExpandedStates() {
@@ -46,7 +29,7 @@
 				}
 			}
 		}
-		collectStates(root)
+		collectStates(tree)
 		localStorage.setItem('navOpenFolders', JSON.stringify(states))
 	}
 
@@ -70,20 +53,20 @@
 		applyStates(content)
 	}
 
-	function searchInTree(searchTerm: string, tree: Folder) {
-		let namePathPairs: { title: string; route: string }[] = []
+	function searchInTree(searchTerm: string, tree: Tree) {
+		let namePathPairs: { title: string; slug: string }[] = []
 		searchTerm = searchTerm.toLocaleLowerCase()
-		for (const obj of tree.children) {
+		for (const obj of tree) {
 			if (
 				obj.type === 'file' &&
 				obj.aliases.some((term) => term.toLocaleLowerCase().includes(searchTerm))
 			) {
-				namePathPairs.push({ title: obj.title, route: obj.route })
+				namePathPairs.push({ title: obj.title, slug: obj.slug })
 				continue
 			}
 
 			if (obj.type === 'folder') {
-				const nestedPairs = searchInTree(searchTerm, obj)
+				const nestedPairs = searchInTree(searchTerm, [obj])
 				namePathPairs.push(...nestedPairs)
 			}
 		}
@@ -93,15 +76,7 @@
 
 	function autocomplete() {
 		if (searchQuery.length < 2) return
-
-		autocompleteLinks = searchInTree(searchQuery, {
-			type: 'folder',
-			title: '',
-			path: '',
-			children: root,
-			expanded: true
-		})
-
+		autocompleteLinks = searchInTree(searchQuery, tree)
 		popoverState = true
 	}
 </script>
@@ -133,7 +108,7 @@
 			{#each autocompleteLinks as link}
 				<a
 					class="btn block w-full text-left hover:bg-surface-200-800"
-					href={`/wiki/${link.route}`}
+					href={`/wiki/${link.slug}`}
 					onclick={() => (searchQuery = '')}>{link.title}</a
 				>
 			{/each}
@@ -143,12 +118,12 @@
 
 <hr class="border-surface-700-300" />
 <div class="overflow-auto">
-	{#each root as entry, idx (entry.path)}
+	{#each tree as entry, idx (entry.path)}
 		<div>
-			{#if root[idx].type === 'folder'}
-				<TreeFolder bind:folder={root[idx]} {saveExpandedStates} />
+			{#if tree[idx].type === 'folder'}
+				<TreeFolder bind:folder={tree[idx]} {saveExpandedStates} />
 			{:else}
-				<TreeFile title={root[idx].title} route={root[idx].route} />
+				<TreeFile title={tree[idx].title} slug={tree[idx].slug} />
 			{/if}
 		</div>
 	{/each}

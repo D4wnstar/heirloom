@@ -28,7 +28,7 @@
 			<button class="btn-icon-lg self-start" onclick={drawerClose}>
 				<X />
 			</button>
-			<Navigation pages={data.pageMetadata} />
+			<Navigation tree={data.navTree} />
 		</div>
 	{/snippet}
 </Modal>
@@ -43,7 +43,7 @@
 			<Menu />
 		</button>
 		<a href="/">
-			<strong class="text-primary-950-50 type-scale-5">{data.settings.title}</strong>
+			<strong class="text-primary-950-50 type-scale-5">{data.wikiSettings.title}</strong>
 		</a>
 	{/snippet}
 	{#snippet trail()}
@@ -55,7 +55,7 @@
 	<nav
 		class="sticky top-4 hidden max-h-[85vh] w-[360px] space-y-3 self-start [@media(min-width:1200px)]:flex [@media(min-width:1200px)]:flex-col [@media(min-width:1200px)]:gap-1"
 	>
-		<Navigation pages={data.pageMetadata} />
+		<Navigation tree={data.navTree} />
 	</nav>
 
 	{@render children()}

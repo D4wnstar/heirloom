@@ -7,7 +7,7 @@
 	// (remove Breadcrumbs from front page)
 
 	let { data } = $props()
-	let headTitle = $derived(`${data.title} - ${data.settings.title}`)
+	let headTitle = $derived(`${data.title} - ${data.wikiSettings.title}`)
 
 	// Store references to event listeners for cleanup
 	let eventListeners: Array<{ element: HTMLElement; handler: EventListener }> = []
