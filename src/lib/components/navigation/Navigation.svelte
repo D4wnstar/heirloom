@@ -6,15 +6,15 @@
 	import { browser } from '$app/environment'
 	import type { Tree } from '$lib/types'
 
-	let { tree }: { tree: Tree } = $props()
+	let { tree: treeProp }: { tree: Tree } = $props()
 
+	// Tree needs to marked as state since props are by design non-reactive
+	let tree = $state(treeProp)
 	let searchQuery = $state('')
 	let popoverState = $state(false)
 	let autocompleteLinks: { title: string; slug: string }[] = $state([])
 
-	onMount(async () => {
-		loadExpandedStates(tree)
-	})
+	onMount(async () => loadExpandedStates(tree))
 
 	function saveExpandedStates() {
 		if (!browser) return

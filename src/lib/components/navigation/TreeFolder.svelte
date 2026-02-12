@@ -32,13 +32,14 @@
 </button>
 
 {#if folder.expanded}
+	{@const children = folder.children}
 	<ul transition:slide={{ duration: 300 }} class="pl-1" id={`folder-${folder.path}`}>
-		{#each folder.children as child}
+		{#each children as child, idx (child.path)}
 			<li class="pl-1">
-				{#if child.type === 'folder'}
-					<TreeFolder folder={child} {saveExpandedStates} />
+				{#if children[idx].type === 'folder'}
+					<TreeFolder bind:folder={children[idx]} {saveExpandedStates} />
 				{:else}
-					<TreeFile title={child.title} slug={child.slug} />
+					<TreeFile title={children[idx].title} slug={children[idx].slug} />
 				{/if}
 			</li>
 		{/each}
