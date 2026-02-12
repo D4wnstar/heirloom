@@ -1,9 +1,10 @@
 import { readFileSync } from 'fs'
 import { ASSETS_FOLDER } from './utils'
-import { join } from 'path'
+import path, { join } from 'path'
+import { markdownToHtml } from './converter/converter'
 
 /**
- * Handle page slug by reading markdown file from the content directory
+ * Fetch a page by reading markdown file from the content directory and converting it.
  * @param filepath The path to the markdown file (relative to the assets directory)
  * @returns The processed page object with HTML content
  */
@@ -11,24 +12,16 @@ export function fetchPage(filepath: string) {
 	const fullPath = join(ASSETS_FOLDER, filepath)
 	console.log('PROCESSING:', fullPath)
 	const markdownContent = readFileSync(fullPath, 'utf-8')
-	const htmlContent = markdownToHtml(markdownContent)
+	const { html, title, frontmatter } = markdownToHtml(markdownContent)
+
+	const titleFromPath = filepath.split(path.sep).at(-1)?.replace(/\.md$/, '') ?? 'Placeholder'
 
 	return {
-		content: htmlContent,
-		title: filepath.split('/').at(-1)?.replace('.md', '').replaceAll('_', ' ') ?? 'Placeholder',
-		path: filepath
+		html,
+		title: title ?? titleFromPath,
+		path: filepath,
+		frontmatter
 	}
-}
-
-/**
- * Mock markdown to HTML converter. To be changed by the proper unified implementation.
- */
-function markdownToHtml(markdown: string): string {
-	return markdown
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/\n/g, '<br>')
 }
 
 /**

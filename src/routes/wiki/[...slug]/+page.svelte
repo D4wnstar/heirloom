@@ -87,7 +87,7 @@
 
 	// Update page content every time it changes
 	$effect(() => {
-		data.content
+		data.html
 		initializeCollapsibleCallouts()
 		initializeImageModals()
 		//@ts-expect-error provided by the global mermaid script
@@ -114,8 +114,8 @@
 	<h1 class="h1 text-center">{data.title}</h1>
 	<hr class="hr" />
 	<article id="content" class="pre-html space-y-4">
-		{#key data.content}
-			{@html data.content}
+		{#key data.html}
+			{@html data.html}
 		{/key}
 	</article>
 	<hr class="hr" />

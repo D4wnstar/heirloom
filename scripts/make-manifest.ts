@@ -126,7 +126,6 @@ function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
 
 		const content = readFileSync(absPath, { encoding: 'utf-8' })
 		const vfile = processor.processSync(content)
-		// TODO: Make an interface for the frontmatter
 		const frontmatter = vfile.data.matter as Frontmatter
 
 		const file: File = {
