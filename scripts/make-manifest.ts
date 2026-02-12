@@ -11,7 +11,7 @@ import remarkParse from 'remark-parse'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkStringify from 'remark-stringify'
 import { matter } from 'vfile-matter'
-import type { Folder, File, Tree, WikiSettings, Manifest } from '../src/lib/types.ts'
+import type { Folder, File, Tree, WikiSettings, Frontmatter, Manifest } from '../src/lib/types.ts'
 
 if (!existsSync(assetsDir)) {
 	console.error('Error: No assets directory when making manifest')
@@ -127,14 +127,14 @@ function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
 		const content = readFileSync(absPath, { encoding: 'utf-8' })
 		const vfile = processor.processSync(content)
 		// TODO: Make an interface for the frontmatter
-		const frontmatter = vfile.data.matter as Record<string, any>
+		const frontmatter = vfile.data.matter as Frontmatter
 
 		const file: File = {
 			type: 'file',
 			title: entry.name.replace(/\.md$/, ''),
 			path: relPath,
 			slug: '', // Made in resolveSlugs
-			aliases: frontmatter['aliases'] ?? []
+			aliases: frontmatter.aliases ?? []
 		}
 
 		workingFiles.push({ file, frontmatter, relPathParent })
@@ -242,6 +242,6 @@ function sortTree(tree: Tree) {
 
 interface FileMeta {
 	file: File
-	frontmatter: Record<string, any>
+	frontmatter: Frontmatter
 	relPathParent: string
 }

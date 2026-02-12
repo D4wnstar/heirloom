@@ -15,6 +15,14 @@ export type WikiSettings = {
 	}
 }
 
+export type Frontmatter = {
+	aliases?: string[]
+	'wiki-publish'?: boolean
+	'wiki-frontpage'?: boolean
+	'wiki-disambiguation'?: string
+	'wiki-project-title'?: string
+} & Record<string, unknown>
+
 export interface Folder {
 	type: 'folder'
 	title: string
