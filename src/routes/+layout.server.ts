@@ -11,5 +11,5 @@ export const prerender = true
 export const load = (async () => {
 	const manifest = readFileSync(MANIFEST_PATH, { encoding: 'utf-8' })
 	const manifestJson: Manifest = JSON.parse(manifest)
-	return { ...manifestJson }
+	return manifestJson
 }) satisfies LayoutServerLoad

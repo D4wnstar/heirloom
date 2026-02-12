@@ -8,10 +8,9 @@ export interface SidebarImageData {
 	caption: string
 }
 
-type WikiSettings = {
+export type WikiSettings = {
 	title: string
 	frontPage: {
-		slug: string
 		path: string
 	}
 }

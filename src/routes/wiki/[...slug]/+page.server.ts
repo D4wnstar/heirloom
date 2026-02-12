@@ -7,10 +7,6 @@ import { readFileSync } from 'fs'
 
 export const load = (async ({ params: { slug }, parent }) => {
 	const layoutData = await parent()
-	if (slug === layoutData.wikiSettings.frontPage.slug) {
-		error(400, 'Front page route is rendered separately as the root route "/"')
-	}
-
 	const path = layoutData.slugsToPath[slug]
 	if (!path) error(404, `No path found for slug ${slug}`)
 	return fetchPage(path)
