@@ -4,9 +4,16 @@ import { assetsDir, devAssetsDir } from './utils.ts'
 
 const sourceRepoUrl = process.env.SOURCE_REPO_URL
 
+if (process.env.VERCEL === '1' && existsSync(assetsDir)) {
+	// On Vercel, assets are cached across builds, so make sure to delete old ones
+	console.log('Removing assets cached by Vercel')
+	rmSync(assetsDir, { recursive: true, force: true })
+}
+
 if (sourceRepoUrl) {
 	if (existsSync(assetsDir)) {
-		// Skip if the repo has already been cloned (mainly for local dev)
+		// During local dev, skip if the repo has already been cloned
+		console.log('assets folder already exists, reutilizing existing assets')
 		process.exit(0)
 	}
 
