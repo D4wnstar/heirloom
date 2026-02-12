@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte'
 	import { browser } from '$app/environment'
 	import type { Tree } from '$lib/types'
+	import { LSVAR_NAVMENU_STATE } from '$lib/utils'
 
 	let { tree: treeProp }: { tree: Tree } = $props()
 
@@ -30,13 +31,13 @@
 			}
 		}
 		collectStates(tree)
-		localStorage.setItem('navOpenFolders', JSON.stringify(states))
+		localStorage.setItem(LSVAR_NAVMENU_STATE, JSON.stringify(states))
 	}
 
 	function loadExpandedStates(content: Tree) {
 		if (!browser) return
 
-		const saved = localStorage.getItem('navOpenFolders')
+		const saved = localStorage.getItem(LSVAR_NAVMENU_STATE)
 		if (!saved) return
 
 		const states: Record<string, boolean> = JSON.parse(saved)

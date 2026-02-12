@@ -1,7 +1,9 @@
 import { readFileSync } from 'fs'
-import { ASSETS_FOLDER } from './utils'
 import path, { join } from 'path'
 import { markdownToHtml } from './converter/converter'
+
+export const ASSETS_FOLDER = 'assets'
+export const MANIFEST_PATH = join(ASSETS_FOLDER, 'manifest.json')
 
 /**
  * Fetch a page by reading markdown file from the content directory and converting it.

@@ -1,4 +1,4 @@
-import { join } from 'path'
-
-export const ASSETS_FOLDER = 'assets'
-export const MANIFEST_PATH = join(ASSETS_FOLDER, 'manifest.json')
+/**
+ * Local storage variable for persisting navigation menu state.
+ */
+export const LSVAR_NAVMENU_STATE = 'navOpenFolders'

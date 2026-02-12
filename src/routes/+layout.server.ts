@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types'
 import { readFileSync } from 'fs'
-import { MANIFEST_PATH } from '$lib/utils'
+import { MANIFEST_PATH } from '$lib/loading'
 import type { Manifest } from '$lib/types'
 
 // The entire site is prerendered. The rest of the site relies on this (e.g., for

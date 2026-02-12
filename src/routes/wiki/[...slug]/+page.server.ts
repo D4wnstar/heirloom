@@ -1,6 +1,6 @@
 import { fetchPage } from '$lib/loading'
 import type { Manifest } from '$lib/types'
-import { MANIFEST_PATH } from '$lib/utils'
+import { MANIFEST_PATH } from '$lib/loading'
 import { error } from '@sveltejs/kit'
 import type { EntryGenerator, PageServerLoad } from './$types'
 import { readFileSync } from 'fs'
