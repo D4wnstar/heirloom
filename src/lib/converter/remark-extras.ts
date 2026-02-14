@@ -9,6 +9,7 @@ import { makeDoubleCharConstruct } from './utils'
 import type { Parent, PhrasingContent, Root } from 'mdast'
 import type { Extension as FromMarkdownExtension, Handle } from 'mdast-util-from-markdown'
 import type { Processor } from 'unified'
+import { visit } from 'unist-util-visit'
 
 declare module 'micromark-util-types' {
 	interface TokenTypeMap {
@@ -262,4 +263,34 @@ export default function remarkExtras() {
 	const fromMarkdownExts = data.fromMarkdownExtensions || (data.fromMarkdownExtensions = [])
 	micromarkExts.push(highlights, comments)
 	fromMarkdownExts.push(highlightsFromMarkdown)
+
+	return function (tree: Root) {
+		visit(tree, 'blockquote', (node) => {
+			const calloutPara = node.children[0]
+			if (calloutPara.type === 'paragraph') {
+				const text = calloutPara.children[0]
+				const calloutOpener = /^\[!(\w+)\]-?/
+				if (text.type === 'text' && calloutOpener.test(text.value)) {
+					console.log(text.value)
+					console.log(node.data)
+					text.value = text.value.replace(calloutOpener, '$1')
+					if (!node.data) {
+						node.data = {
+							hName: 'div',
+							hProperties: { class: 'callout' }
+						}
+					} else {
+						node.data.hName = 'div'
+						let props = node.data?.hProperties
+						if (props) {
+							props['class'] = 'callout'
+						} else {
+							props = { class: 'callout' }
+						}
+					}
+					console.log('-------')
+				}
+			}
+		})
+	}
 }
