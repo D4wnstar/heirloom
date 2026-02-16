@@ -3,6 +3,12 @@ import { codes } from 'micromark-util-symbol'
 import { makeDoubleCharConstruct } from './utils'
 import type { Root } from 'mdast'
 
+declare module 'micromark-util-types' {
+	interface TokenTypeMap {
+		comment: 'comment'
+	}
+}
+
 const commentTokenize: Tokenizer = function (effects, ok, nok) {
 	return start
 

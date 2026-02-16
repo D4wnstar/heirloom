@@ -15,7 +15,6 @@ declare module 'micromark-util-types' {
 		highlight: 'highlight'
 		highlightMarker: 'highlightMarker'
 		highlightString: 'highlightString'
-		comment: 'comment'
 	}
 }
 
