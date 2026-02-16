@@ -134,8 +134,22 @@ This is an *inline* footnote.^[Yet another reference.]
 ## Callouts
 Callouts use the Obsidian syntax.
 
-> [!info] Info
-> Content with an *actual* formatting inside.
+> [!info] Callouts!
+> Content with *actual* formatting inside.
+
+> [!info]
+> Default callout titles also work.
+
+> [!info] Empty *callout*
+
+> [!info]
+
+> [!example] Annoying *callout*
+> > Nested blockquote to start
+
+> [!example] Another annoying *callout*
+> 
+> Empty newline to start
 
 > [!info]- Unfold me!
 > Callouts can be foldable to avoid taking up tons of space.
@@ -145,7 +159,7 @@ Callouts use the Obsidian syntax.
 > > [!info] Nested!
 > > See?
 > > > [!quote]- Nested *and* foldable!
-> > > It just works.
+> > > It *just* works.
 
 ## Math
 A **harmonic oscillator** is a system with an equilibrium point that, after undergoing a perturbation, experiences a restoring force $\mathbf{F}$ proportional to the displacement distance $\mathbf{x}$ according to **Hooke's law**:

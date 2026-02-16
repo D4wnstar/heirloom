@@ -131,7 +131,7 @@ a[href^="https://"]::after
 		@apply overflow-hidden rounded !bg-opacity-40 p-6 pt-4 bg-primary-50-950;
 	}
 
-	.callout.is-collapsible {
+	.callout.collapsible {
 		@apply transition-all;
 	}
 
@@ -143,11 +143,11 @@ a[href^="https://"]::after
 		@apply flex items-start gap-2 font-bold;
 	}
 
-	.callout.is-collapsible .callout-title {
+	.callout.collapsible .callout-title {
 		@apply cursor-pointer;
 	}
 
-	.callout.is-collapsible .callout-fold svg {
+	.callout.collapsible .callout-fold svg {
 		@apply -rotate-90 transition-transform;
 	}
 
