@@ -169,10 +169,12 @@ $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\ome
 
 # Links
 ## Regular
-- [[Wave equation]]
-- [[Wave equation#Introduction to waves]]
-- [[Wave equation|Wavefunction]]
-- [[Wave equation#Introduction to waves|Intro]]
+- [[Wave equation]] (regular)
+- [[Wave equation#Introduction to waves]] (section)
+- [[Wave equation|Wavefunction]] (alias)
+- [[Wave equation#Introduction to waves|Intro]] (section + alias)
+- [[#Introduction to waves]] (internal section)
+- [[#Introduction to waves|Intro]] (internal section + alias)
 
 ## Embeds
 ### Pages

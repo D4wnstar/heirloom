@@ -22,6 +22,7 @@ declare module 'mdast' {
 	interface PhrasingContentMap {
 		highlight: Highlight
 	}
+
 	interface RootContentMap {
 		highlight: Highlight
 	}
@@ -46,13 +47,11 @@ const highlightTokenize: Tokenizer = function (effects, ok, nok) {
 
 	function startConfirm(code: Code) {
 		// Guarantee a double opening equals
-		if (code === codes.equalsTo) {
-			effects.consume(code)
-			effects.exit('highlightMarker')
-			effects.enter('highlightString')
-			return gatekeep
-		}
-		return nok(code)
+		if (code !== codes.equalsTo) return nok(code)
+		effects.consume(code)
+		effects.exit('highlightMarker')
+		effects.enter('highlightString')
+		return gatekeep
 	}
 
 	function gatekeep(code: Code) {

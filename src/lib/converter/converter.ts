@@ -22,6 +22,7 @@ import remarkGfm from 'remark-gfm'
 import remarkHighlights from './remark-highlights'
 import remarkComments from './remark-comments'
 import remarkCallouts from './remark-callouts'
+import remarkWikilinks from './remark-wikilinks'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
 import rehypePrism from 'rehype-prism-plus'
@@ -40,6 +41,7 @@ const processor = unified()
 	.use(remarkHighlights)
 	.use(remarkComments)
 	.use(remarkCallouts)
+	.use(remarkWikilinks)
 	.use(remarkMath)
 	.use(remarkRehype, { allowDangerousHtml: true })
 	.use(rehypeKatex)
