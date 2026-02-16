@@ -19,7 +19,9 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import remarkGfm from 'remark-gfm'
-import remarkExtras from './remark-extras'
+import remarkHighlights from './remark-highlights'
+import remarkComments from './remark-comments'
+import remarkCallouts from './remark-callouts'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
 import rehypePrism from 'rehype-prism-plus'
@@ -35,7 +37,9 @@ const processor = unified()
 	.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
 	.use(() => (_, file) => matter(file)) // Export frontmatter to the VFile
 	.use(remarkGfm)
-	.use(remarkExtras)
+	.use(remarkHighlights)
+	.use(remarkComments)
+	.use(remarkCallouts)
 	.use(remarkMath)
 	.use(remarkRehype, { allowDangerousHtml: true })
 	.use(rehypeKatex)

@@ -135,7 +135,7 @@ a[href^="https://"]::after
 		@apply transition-all;
 	}
 
-	.callout.is-collapsed {
+	.callout.collapsed {
 		@apply space-y-0 py-4;
 	}
 

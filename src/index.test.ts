@@ -1,4 +1,5 @@
-import { comments, highlights } from '$lib/converter/remark-extras'
+import { comments } from '$lib/converter/remark-comments'
+import { highlights } from '$lib/converter/remark-highlights'
 import { micromark } from 'micromark'
 import { describe, it, expect } from 'vitest'
 
@@ -20,6 +21,7 @@ describe('remark-extras', () => {
 			expect(micromark(text, { extensions: [highlights] })).toBe('<p></p>')
 		})
 
+		// FIXME: Current escaping implementation is broken
 		// it('should parse highlighted with one escape', () => {
 		// 	const text = '==Highlights\\==escape artist=='
 		// 	expect(micromark(text, { extensions: [highlights] })).toBe('<p></p>')
