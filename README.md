@@ -1,5 +1,8 @@
-# Wiki Generator Website Template
+# Heirloom
+> A minimal but powerful markdown site builder for the ages.
 
-This is the website template for the [Wiki Generator](https://github.com/D4wnstar/wiki-generator) plugin for [Obsidian.md](https://obsidian.md/). This is the code that will create and style your website. You can start using it by pressing the big **Deploy** button just below. Provided you are logged into [Vercel](https://vercel.com), it'll prompt you to copy the website by creating a new Project. Just follow the instructions and it'll be up and running in no time.
+## Overview
+**Heirloom** is a markdown publishing system designed for simplicity, extensibility and permanence. Content is plain markdown, stored in a regular git repository and renders to static HTML directly in the template through the [unified](https://unifiedjs.com/) ecosystem, with zero external services, runtime dependencies or vendor-locking. Syntax support can be added or removed as simply as adding or removing a unified plugin. Heirloom supports transparent collaboration through standard git workflows and produces sites that remain readable forever, anywhere.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FD4wnstar%2Fwiki-generator-template%2Ftree%2Fmain&env=TURSO_URL,TURSO_AUTH_TOKEN,JWT_SECRET&envDescription=API%20keys%20needed%20to%20connect%20to%20Turso%20and%20to%20handle%20users.%20Make%20sure%20your%20Turso%20database%20is%20initialized!)
+> [!WARNING]
+> Heirloom is the new incarnation of the former [Wiki Generator](https://github.com/D4wnstar/wiki-generator) project and is currently undergoing a complete architectural overhaul. This means that Heirloom is not yet ready for production and this README is still incomplete.
