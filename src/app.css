@@ -65,6 +65,10 @@ a[href^="https://"]::after
 		@apply anchor underline-offset-4 text-primary-800-200 hover:underline;
 	}
 
+	a.broken-link {
+		@apply text-error-800-200;
+	}
+
 	code {
 		@apply code;
 	}

@@ -16,6 +16,10 @@ wiki-publish: true
 
 ###### Header 6
 
+### *Formatted* ==heading==
+
+### With $\mathbf{y}=m\mathbf{x}+q$ math
+
 # Formatting
 
 - _Italic_
@@ -173,8 +177,8 @@ $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\ome
 - [[Wave equation#Introduction to waves]] (section)
 - [[Wave equation|Wavefunction]] (alias)
 - [[Wave equation#Introduction to waves|Intro]] (section + alias)
-- [[#Introduction to waves]] (internal section)
-- [[#Introduction to waves|Intro]] (internal section + alias)
+- [[#Callouts]] (internal section)
+- [[#Callouts|Cool syntax]] (internal section + alias)
 
 ## Embeds
 ### Pages

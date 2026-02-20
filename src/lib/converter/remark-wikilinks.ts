@@ -2,8 +2,9 @@ import { markdownLineEnding, markdownSpace } from 'micromark-util-character'
 import { codes } from 'micromark-util-symbol'
 import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
-import type { Literal, Parent } from 'mdast'
-import type { Extension as FromMarkdownExtension, Handle } from 'mdast-util-from-markdown'
+import type { Link, Literal, Parent, Root } from 'mdast'
+import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
+import { visit } from 'unist-util-visit'
 
 // A wikilink has the following general syntax:
 //
@@ -235,6 +236,8 @@ const tokenizeWikilink: Tokenizer = function (effects, ok, nok) {
 	}
 }
 
+// Embeds are the same as regular wikilinks with a ! at the start, so we
+// reuse the wikilink tokenizer
 const tokenizeEmbed: Tokenizer = function (effects, ok, nok) {
 	return start
 
@@ -257,47 +260,6 @@ const doubleSquareBracketConstruct = makeDoubleCharConstruct(
 	codes.rightSquareBracket
 )
 
-const enterWikilink: Handle = function (token) {
-	this.enter(
-		{
-			type: 'wikilink',
-			data: { hName: 'a' },
-			children: []
-		},
-		token
-	)
-}
-
-const enterWikilinkTarget: Handle = function (token) {
-	this.enter(
-		{
-			type: 'wikilinkTarget',
-			value: this.sliceSerialize(token)
-		},
-		token
-	)
-}
-
-const enterWikilinkSection: Handle = function (token) {
-	this.enter(
-		{
-			type: 'wikilinkSection',
-			value: ' > ' + this.sliceSerialize(token)
-		},
-		token
-	)
-}
-
-const enterWikilinkAlias: Handle = function (token) {
-	this.enter(
-		{
-			type: 'wikilinkAlias',
-			value: ' [' + this.sliceSerialize(token) + ']'
-		},
-		token
-	)
-}
-
 const wikilinkConstruct: Construct = { name: 'wikilink', tokenize: tokenizeWikilink }
 const embedConstruct: Construct = { name: 'wikilinkEmbed', tokenize: tokenizeEmbed }
 export const wikilinks: Extension = {
@@ -309,10 +271,18 @@ export const wikilinks: Extension = {
 
 const wikilinksFromMarkdown: FromMarkdownExtension = {
 	enter: {
-		wikilink: enterWikilink,
-		wikilinkTarget: enterWikilinkTarget,
-		wikilinkSection: enterWikilinkSection,
-		wikilinkAlias: enterWikilinkAlias
+		wikilink: function (token) {
+			this.enter({ type: 'wikilink', children: [] }, token)
+		},
+		wikilinkTarget: function (token) {
+			this.enter({ type: 'wikilinkTarget', value: this.sliceSerialize(token) }, token)
+		},
+		wikilinkSection: function (token) {
+			this.enter({ type: 'wikilinkSection', value: this.sliceSerialize(token) }, token)
+		},
+		wikilinkAlias: function (token) {
+			this.enter({ type: 'wikilinkAlias', value: this.sliceSerialize(token) }, token)
+		}
 	},
 	exit: {
 		wikilink: function (token) {
@@ -330,10 +300,14 @@ const wikilinksFromMarkdown: FromMarkdownExtension = {
 	}
 }
 
+export interface WikilinkOptions {
+	pathsToRoutes: Record<string, string>
+}
+
 /**
  * Remark plugin to support markdown `[[wikilinks]]`.
  */
-export default function remarkWikilinks() {
+export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) {
 	//@ts-expect-error TS doesn't understand `this`
 	const self = this as Processor<Root>
 	const data = self.data()
@@ -343,4 +317,90 @@ export default function remarkWikilinks() {
 	const fromMarkdownExts = data.fromMarkdownExtensions || (data.fromMarkdownExtensions = [])
 	micromarkExts.push(wikilinks)
 	fromMarkdownExts.push(wikilinksFromMarkdown)
+
+	const pathsToRoutes = options.pathsToRoutes
+	if (!pathsToRoutes) return
+
+	return function (tree: Root) {
+		visit(tree, 'wikilink', (node, index, parent) => {
+			// We'll be replacing the entire wikilink node so we need it to have
+			// a parent and a child index
+			if (parent === undefined || index === undefined) return
+
+			// Each wikilink node needs to parsed into a proper <a> tag
+			const targetNode = node.children.find((n) => n.type === 'wikilinkTarget')
+			const sectionNode = node.children.find((n) => n.type === 'wikilinkSection')
+			const aliasNode = node.children.find((n) => n.type === 'wikilinkAlias')
+
+			const target = targetNode?.value
+			const section = sectionNode?.value
+			const alias = aliasNode?.value
+
+			let linkText: string
+			if (alias) {
+				linkText = alias
+			} else if (section) {
+				linkText = target ? `${target} > ${section}` : `> ${section}`
+			} else {
+				linkText = target ?? 'Link'
+			}
+
+			const brokenLink: Link = {
+				type: 'link',
+				url: '/broken', // TODO: Determine where broken links should go
+				children: [{ type: 'text', value: linkText }],
+				data: { hProperties: { class: 'broken-link' } }
+			}
+
+			const setLink = (link: Link) => (parent.children[index] = link)
+
+			let url: string
+			if (target) {
+				// The target is either a file name or a file path
+				// If it's a path, we just get the corresponding slug
+				// If it's a name (stem, without ext), we can't be sure if it's unique or not
+				// In this case, we get the first path whose name is equal to the
+				// given name. This check also needs to be case-insensitive
+				// TODO: Check that / is always the correct path separator
+				let path: string | undefined
+				if (target.includes('/')) {
+					path = target
+				} else {
+					path = Object.keys(pathsToRoutes).find((path) => {
+						const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
+						return fileStem?.toLowerCase() === target.toLowerCase()
+					})
+				}
+				if (!path) {
+					setLink(brokenLink) // Probably unintended
+					return
+				}
+
+				const route = pathsToRoutes[path]
+				if (!route) {
+					setLink(brokenLink) // Possibly intended (e.g., link to a future page)
+					return
+				}
+
+				url = section ? `${route}#${section}` : route
+			} else if (section) {
+				// This is an internal #Section link
+				url = '#' + section
+			} else {
+				const textDump = node.children.reduce((acc, n) => acc + ' ' + n.value, '')
+				console.warn(
+					`Detected wikilink '${textDump}' with neither target nor section. At least one must be present. Ignoring link`
+				)
+				setLink(brokenLink)
+				return
+			}
+
+			const goodLink: Link = {
+				type: 'link',
+				url,
+				children: [{ type: 'text', value: linkText }]
+			}
+			setLink(goodLink)
+		})
+	}
 }

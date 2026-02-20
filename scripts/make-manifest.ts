@@ -24,8 +24,12 @@ const { root, folders, entries } = collectFileTree(assetsDir)
 // Read all files to get their frontmatter, plus other metadata
 const fileMetadata = collectFileMetadata(entries, assetsDir)
 
-// Resolve the slugs
-const slugsToPath = resolveSlugs(fileMetadata)
+// Map slugs to paths for page generation
+// and paths to routes for wikilink generation
+const slugsToPaths = resolveSlugs(fileMetadata)
+const pathsToRoutes = Object.fromEntries(
+	Object.entries(slugsToPaths).map(([slug, path]) => [path, '/wiki/' + slug])
+)
 
 // Set settings and the navigation tree
 const wikiSettings: WikiSettings = {
@@ -58,7 +62,8 @@ if (wikiSettings.frontPage.path === '') {
 // Aggregate everything and save
 const manifest: Manifest = {
 	wikiSettings,
-	slugsToPath,
+	slugsToPaths,
+	pathsToRoutes,
 	navTree: root.children
 }
 

@@ -44,5 +44,6 @@ export type Tree = (File | Folder)[]
 export interface Manifest {
 	wikiSettings: WikiSettings
 	navTree: Tree
-	slugsToPath: Record<string, string>
+	slugsToPaths: Record<string, string>
+	pathsToRoutes: Record<string, string>
 }

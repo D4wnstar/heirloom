@@ -7,15 +7,15 @@ import { readFileSync } from 'fs'
 
 export const load = (async ({ params: { slug }, parent }) => {
 	const layoutData = await parent()
-	const path = layoutData.slugsToPath[slug]
+	const path = layoutData.slugsToPaths[slug]
 	if (!path) error(404, `No path found for slug ${slug}`)
-	return fetchPage(path)
+	return fetchPage(path, layoutData.pathsToRoutes)
 }) satisfies PageServerLoad
 
 export const entries: EntryGenerator = async () => {
 	const manifest = readFileSync(MANIFEST_PATH, { encoding: 'utf-8' })
 	const manifestJson: Manifest = JSON.parse(manifest)
-	const slugs = Object.keys(manifestJson.slugsToPath).map((slug) => ({
+	const slugs = Object.keys(manifestJson.slugsToPaths).map((slug) => ({
 		slug
 	}))
 
