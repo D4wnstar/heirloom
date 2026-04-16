@@ -317,8 +317,53 @@ const wikilinksFromMarkdown: FromMarkdownExtension = {
 	}
 }
 
+export type HrefResolver = (
+	target: string | undefined,
+	section: string | undefined
+) => string | null
+
+export type LinkTextResolver = (
+	target: string | undefined,
+	section: string | undefined,
+	alias: string | undefined
+) => string
+
 export interface WikilinkOptions {
-	pathsToRoutes: Record<string, string>
+	/**
+	 * Function to resolve a wikilink `(target, section)` pair to an href.
+	 * Both `target` and `section` are optional.
+	 * The function may return null to represent a broken link.
+	 */
+	hrefResolver?: HrefResolver
+	/**
+	 * Function to resolve a wikilink `(target, section, alias)` tuple to a string.
+	 * All three are optional. This string will be used as the display text of the `<a>`
+	 * element.
+	 */
+	linkTextResolver?: LinkTextResolver
+}
+
+const defaultHrefResolver: HrefResolver = (target, section) => {
+	if (target) {
+		return section ? `/${target}#${section}` : `/${target}`
+	} else if (section) {
+		return '#' + section
+	} else {
+		console.warn(
+			'Detected wikilink with neither target nor section. At least one must be present. Ignoring link'
+		)
+		return null
+	}
+}
+
+const defaultLinkTextResolver: LinkTextResolver = (target, section, alias) => {
+	if (alias) {
+		return alias
+	} else if (section) {
+		return target ? `${target} > ${section}` : `> ${section}`
+	} else {
+		return target ?? 'Link'
+	}
 }
 
 /**
@@ -329,14 +374,14 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 	const self = this as Processor<Root>
 	const data = self.data()
 
+	const hrefResolver = options.hrefResolver ?? defaultHrefResolver
+	const linkTextResolver = options.linkTextResolver ?? defaultLinkTextResolver
+
 	// Register extensions
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
 	const fromMarkdownExts = data.fromMarkdownExtensions || (data.fromMarkdownExtensions = [])
 	micromarkExts.push(wikilinks)
 	fromMarkdownExts.push(wikilinksFromMarkdown)
-
-	const pathsToRoutes = options.pathsToRoutes
-	if (!pathsToRoutes) return
 
 	return function (tree: Root) {
 		visit(tree, 'embed', (node, index, parent) => {
@@ -356,79 +401,29 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 			if (parent === undefined || index === undefined) return
 
 			// Each wikilink node needs to parsed into a proper <a> tag
-			const targetNode = node.children.find((n) => n.type === 'wikilinkTarget')
-			const sectionNode = node.children.find((n) => n.type === 'wikilinkSection')
-			const aliasNode = node.children.find((n) => n.type === 'wikilinkAlias')
+			const target = node.children.find((n) => n.type === 'wikilinkTarget')?.value
+			const section = node.children.find((n) => n.type === 'wikilinkSection')?.value
+			const alias = node.children.find((n) => n.type === 'wikilinkAlias')?.value
 
-			const target = targetNode?.value
-			const section = sectionNode?.value
-			const alias = aliasNode?.value
+			const linkText = linkTextResolver(target, section, alias)
+			const href = hrefResolver(target, section)
 
-			let linkText: string
-			if (alias) {
-				linkText = alias
-			} else if (section) {
-				linkText = target ? `${target} > ${section}` : `> ${section}`
+			if (href) {
+				const goodLink: Link = {
+					type: 'link',
+					url: href,
+					children: [{ type: 'text', value: linkText }]
+				}
+				parent.children[index] = goodLink
 			} else {
-				linkText = target ?? 'Link'
-			}
-
-			const brokenLink: Link = {
-				type: 'link',
-				url: '/broken', // TODO: Determine where broken links should go
-				children: [{ type: 'text', value: linkText }],
-				data: { hProperties: { class: 'broken-link' } }
-			}
-
-			const setLink = (link: Link) => (parent.children[index] = link)
-
-			let url: string
-			if (target) {
-				// The target is either a file name or a file path
-				// If it's a path, we just get the corresponding slug
-				// If it's a name (stem, without ext), we can't be sure if it's unique or not
-				// In this case, we get the first path whose name is equal to the
-				// given name. This check also needs to be case-insensitive
-				// TODO: Check that / is always the correct path separator
-				let path: string | undefined
-				if (target.includes('/')) {
-					path = target
-				} else {
-					path = Object.keys(pathsToRoutes).find((path) => {
-						const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
-						return fileStem?.toLowerCase() === target.toLowerCase()
-					})
+				const brokenLink: Link = {
+					type: 'link',
+					url: '/broken', // TODO: Determine where broken links should go
+					children: [{ type: 'text', value: linkText }],
+					data: { hProperties: { class: 'broken-link' } }
 				}
-				if (!path) {
-					setLink(brokenLink) // Probably unintended
-					return
-				}
-
-				const route = pathsToRoutes[path]
-				if (!route) {
-					setLink(brokenLink) // Possibly intended (e.g., link to a future page)
-					return
-				}
-
-				url = section ? `${route}#${section}` : route
-			} else if (section) {
-				// This is an internal #Section link
-				url = '#' + section
-			} else {
-				const textDump = node.children.reduce((acc, n) => acc + ' ' + n.value, '')
-				console.warn(
-					`Detected wikilink '${textDump}' with neither target nor section. At least one must be present. Ignoring link`
-				)
-				setLink(brokenLink)
-				return
+				parent.children[index] = brokenLink
 			}
-
-			const goodLink: Link = {
-				type: 'link',
-				url,
-				children: [{ type: 'text', value: linkText }]
-			}
-			setLink(goodLink)
 		})
 	}
 }
