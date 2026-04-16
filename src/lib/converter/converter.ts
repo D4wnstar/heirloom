@@ -22,7 +22,7 @@ import remarkGfm from 'remark-gfm'
 import remarkHighlights from './remark-highlights'
 import remarkComments from './remark-comments'
 import remarkCallouts from './remark-callouts'
-import remarkWikilinks, { type HrefResolver } from './remark-wikilinks'
+import remarkWikilinks, { type HrefResolver, type PageEmbedResolver } from './remark-wikilinks'
 import remarkHeadingIds from './remark-heading-ids'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
@@ -32,43 +32,82 @@ import rehypeExternalLinks from 'rehype-external-links'
 // import rehypeMermaid from 'rehype-mermaid'
 import { matter } from 'vfile-matter'
 import type { Frontmatter } from '$lib/types'
+import { join } from 'path'
+import { ASSETS_FOLDER } from '$lib/loading'
+import { readFileSync } from 'fs'
+import type { Root } from 'mdast'
+
+function preprocessMarkdown(md: string) {
+	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
+}
 
 export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, string>) {
+	const getPath = (target: string) => {
+		// The target can be a file name or a file path
+		// TODO: Check that / is always the correct path separator
+		if (target.includes('/')) return target
+
+		// If it's a name (stem, without ext), we can't be sure if it's unique or not
+		// In this case, we get the first path whose name is equal to the
+		// given name. This check also needs to be case-insensitive
+		const paths = Object.keys(pathsToRoutes)
+		const path = paths.find((path) => {
+			const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
+			return fileStem?.toLowerCase() === target.toLowerCase()
+		})
+		return path
+	}
+
 	const hrefResolver: HrefResolver = (target, section) => {
-		if (target) {
-			// The target is either a file name or a file path
-			// If it's a path, we just get the corresponding slug
-			// If it's a name (stem, without ext), we can't be sure if it's unique or not
-			// In this case, we get the first path whose name is equal to the
-			// given name. This check also needs to be case-insensitive
-			// TODO: Check that / is always the correct path separator
-			let path: string | undefined
-			if (target.includes('/')) {
-				path = target
-			} else {
-				path = Object.keys(pathsToRoutes).find((path) => {
-					const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
-					return fileStem?.toLowerCase() === target.toLowerCase()
-				})
-			}
-			if (!path) {
-				return null // Probably unintended
-			}
-
-			const route = pathsToRoutes[path]
-			if (!route) {
-				return null // Possibly intended (e.g., link to a future page)
-			}
-
-			return section ? `${route}#${section}` : route
-		} else if (section) {
+		if (target && section) {
+			const path = getPath(target)
+			return path ? `${pathsToRoutes[path]}#${section}` : null
+		} else if (target && !section) {
+			const path = getPath(target)
+			return path ? pathsToRoutes[path] : null
+		} else if (!target && section) {
 			// This is an internal #Section link
-			return '#' + section
+			return `#${section}`
 		} else {
 			console.warn(
 				`Detected wikilink with neither target nor section. At least one must be present. Ignoring link`
 			)
 			return null
+		}
+	}
+
+	const pageEmbedResolver: PageEmbedResolver = (processor, target, section) => {
+		const path = getPath(target)
+		if (!path) return [] // TODO: Make a broken embed placeholder
+		const filepath = join(ASSETS_FOLDER, path)
+		const markdown = preprocessMarkdown(readFileSync(filepath, 'utf-8'))
+		const ast = processor.parse(markdown) as Root
+
+		if (section) {
+			// Find the start and end index of the section nodes we want to isolate
+			const sectionStartIndex = ast.children.findIndex(
+				(n) =>
+					n.type === 'heading' &&
+					//@ts-expect-error TS LSP doesn't understand hasOwn
+					n.children.find((c) => Object.hasOwn(c, 'value') && c.value === section)
+			)
+			if (sectionStartIndex === -1) return []
+
+			let sectionEndIndex: number | undefined = ast.children.slice(sectionStartIndex).findIndex(
+				(n) =>
+					n.type === 'heading' &&
+					//@ts-expect-error TS LSP doesn't understand hasOwn
+					n.children.find((c) => Object.hasOwn(c, 'value') && c.value !== section)
+			)
+			if (sectionEndIndex === -1) {
+				sectionEndIndex = undefined
+			} else {
+				sectionEndIndex += sectionStartIndex
+			}
+
+			return ast.children.slice(sectionStartIndex, sectionEndIndex)
+		} else {
+			return ast.children
 		}
 	}
 
@@ -80,7 +119,7 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 		.use(remarkHighlights)
 		.use(remarkComments)
 		.use(remarkCallouts)
-		.use(remarkWikilinks, { hrefResolver })
+		.use(remarkWikilinks, { hrefResolver, pageEmbedResolver })
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkRehype, { allowDangerousHtml: true })
@@ -91,8 +130,7 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 		.use(rehypeStringify, { allowDangerousHtml: true })
 
 	// remarkMath has nonstandard syntax for block math, so we fix it here
-	markdown = markdown.replaceAll(/^\$\$/gm, '$$$$\n')
-	markdown = markdown.replaceAll(/\$\$$/gm, '\n$$$$')
+	markdown = preprocessMarkdown(markdown)
 
 	const vfile = processor.processSync(markdown)
 	const frontmatter = vfile.data.frontmatter as Frontmatter

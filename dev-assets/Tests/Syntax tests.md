@@ -184,7 +184,7 @@ $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\ome
 ### Pages
 ![[Block syntax]]
 
-![[Wave equation#Boundary conditions]]
+![[Wave equation#Introduction to waves]]
 
 ### Media
 ![[Cat.jpg]]

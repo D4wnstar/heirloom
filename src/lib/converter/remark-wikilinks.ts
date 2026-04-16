@@ -2,9 +2,10 @@ import { markdownLineEnding, markdownSpace } from 'micromark-util-character'
 import { codes } from 'micromark-util-symbol'
 import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
-import type { Link, Literal, Paragraph, Parent, Root } from 'mdast'
+import type { Blockquote, Link, Literal, Parent, Root, RootContent } from 'mdast'
 import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
 import { visit } from 'unist-util-visit'
+import type { Processor } from 'unified'
 
 // A wikilink has the following general syntax:
 //
@@ -39,6 +40,10 @@ declare module 'mdast' {
 		wikilink: Wikilink
 	}
 
+	interface BlockContentMap {
+		embed: Embed
+	}
+
 	interface RootContentMap {
 		wikilink: Wikilink
 		embed: Embed
@@ -55,7 +60,7 @@ interface Wikilink extends Parent {
 
 interface Embed extends Parent {
 	type: 'embed'
-	children: WikilinkComponent[]
+	children: Wikilink[]
 }
 
 interface WikilinkTarget extends Literal {
@@ -76,7 +81,6 @@ const tokenizeWikilink: Tokenizer = function (effects, ok, nok) {
 	// Empty links like [[]] and [[   ]] are invalid so we keep track of whether
 	// the only things we find are spaces (or nothing)
 	let foundNonSpace = false
-
 	return start
 
 	function start(code: Code) {
@@ -328,6 +332,12 @@ export type LinkTextResolver = (
 	alias: string | undefined
 ) => string
 
+export type PageEmbedResolver = (
+	processor: Processor,
+	target: string,
+	section: string | undefined
+) => RootContent[]
+
 export interface WikilinkOptions {
 	/**
 	 * Function to resolve a wikilink `(target, section)` pair to an href.
@@ -341,6 +351,14 @@ export interface WikilinkOptions {
 	 * element.
 	 */
 	linkTextResolver?: LinkTextResolver
+	/**
+	 * Function to resolve a wikilink `(target, section)` tuple to an array of MDAST nodes.
+	 * Section is optional. These nodes will be injected in the main document's MDAST in
+	 * place of the embed, within an appropriate container node.
+	 *
+	 * The default implementation does nothing and simply removes embeds.
+	 */
+	pageEmbedResolver?: PageEmbedResolver
 }
 
 const defaultHrefResolver: HrefResolver = (target, section) => {
@@ -366,16 +384,19 @@ const defaultLinkTextResolver: LinkTextResolver = (target, section, alias) => {
 	}
 }
 
+const defaultPageEmbedResolver: PageEmbedResolver = () => []
+
 /**
  * Remark plugin to support markdown `[[wikilinks]]`.
  */
 export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) {
 	//@ts-expect-error TS doesn't understand `this`
-	const self = this as Processor<Root>
+	const self = this as Processor
 	const data = self.data()
 
 	const hrefResolver = options.hrefResolver ?? defaultHrefResolver
 	const linkTextResolver = options.linkTextResolver ?? defaultLinkTextResolver
+	const pageEmbedResolver = options.pageEmbedResolver ?? defaultPageEmbedResolver
 
 	// Register extensions
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
@@ -385,19 +406,48 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 
 	return function (tree: Root) {
 		visit(tree, 'embed', (node, index, parent) => {
+			// We'll be replacing the entire wikilink node so we need it to have
+			// a parent and an index
 			if (parent === undefined || index === undefined) return
 
-			const placeholder: Paragraph = {
-				type: 'paragraph',
-				children: [{ type: 'text', value: '[Pretend this is an embed.]' }]
+			const wikilink = node.children.find((n) => n.type === 'wikilink')
+			if (!wikilink) {
+				console.warn(`No wikilink found in embed`)
+				return
+			}
+			const target = wikilink.children.find((n) => n.type === 'wikilinkTarget')?.value
+			const section = wikilink.children.find((n) => n.type === 'wikilinkSection')?.value
+			//const alias = wikilink.children.find((n) => n.type === 'wikilinkAlias')?.value
+
+			if (!target) {
+				console.warn(`No target found in embed`)
+				// Technically this could be supported and Obsidian actually does
+				// An embed with no target but with a section, like ![[#Section]],
+				// embeds a section from somewhere in the document itself. However,
+				// it's more work to implement and it's not a very useful feature
+				// so it'll remain unsupported for the time being
+				return
 			}
 
-			parent.children[index] = placeholder
+			// A text embed is just a big blockquote containing all the text of the
+			// embedded page. A media embed is more complicated and depends on the kind
+			// of medium that's embedded.
+
+			// Check if it's a media embed by seeing if there is a file extension
+			const isMedia = /\..*/.test(target)
+			if (!isMedia) {
+				const embedNodes = pageEmbedResolver(self, target, section)
+				if (!embedNodes) return
+				const pageEmbed: Blockquote = {
+					type: 'blockquote',
+					//@ts-expect-error TODO: Figure out how to not make TS complain
+					children: embedNodes
+				}
+				parent.children[index] = pageEmbed
+			}
 		})
 
 		visit(tree, 'wikilink', (node, index, parent) => {
-			// We'll be replacing the entire wikilink node so we need it to have
-			// a parent and an index
 			if (parent === undefined || index === undefined) return
 
 			// Each wikilink node needs to parsed into a proper <a> tag
