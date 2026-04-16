@@ -2,7 +2,7 @@ import { markdownLineEnding, markdownSpace } from 'micromark-util-character'
 import { codes } from 'micromark-util-symbol'
 import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
-import type { Link, Literal, Parent, Root } from 'mdast'
+import type { Link, Literal, Paragraph, Parent, Root } from 'mdast'
 import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
 import { visit } from 'unist-util-visit'
 
@@ -24,12 +24,13 @@ declare module 'micromark-util-types' {
 	interface TokenTypeMap {
 		wikilink: 'wikilink'
 		wikilinkMarker: 'wikilinkMarker'
-		wikilinkEmbedMarker: 'wikilinkEmbedMarker'
 		wikilinkTarget: 'wikilinkTarget'
 		wikilinkSection: 'wikilinkSection'
 		wikilinkSectionMarker: 'wikilinkSectionMarker'
 		wikilinkAlias: 'wikilinkAlias'
 		wikilinkAliasMarker: 'wikilinkAliasMarker'
+		embed: 'embed'
+		embedMarker: 'embedMarker'
 	}
 }
 
@@ -40,6 +41,7 @@ declare module 'mdast' {
 
 	interface RootContentMap {
 		wikilink: Wikilink
+		embed: Embed
 		wikilinkTarget: WikilinkTarget
 		wikilinkSection: WikilinkSection
 		wikilinkAlias: WikilinkAlias
@@ -48,6 +50,11 @@ declare module 'mdast' {
 
 interface Wikilink extends Parent {
 	type: 'wikilink'
+	children: WikilinkComponent[]
+}
+
+interface Embed extends Parent {
+	type: 'embed'
 	children: WikilinkComponent[]
 }
 
@@ -243,12 +250,16 @@ const tokenizeEmbed: Tokenizer = function (effects, ok, nok) {
 
 	function start(code: Code) {
 		if (code !== codes.exclamationMark) return nok(code)
-		effects.enter('wikilinkEmbedMarker')
+		effects.enter('embed')
+		effects.enter('embedMarker')
 		effects.consume(code)
-		effects.exit('wikilinkEmbedMarker')
+		effects.exit('embedMarker')
 		return effects.attempt(
 			wikilinkConstruct,
-			() => ok,
+			() => {
+				effects.exit('embed')
+				return ok
+			},
 			(code) => nok(code)
 		)
 	}
@@ -261,7 +272,7 @@ const doubleSquareBracketConstruct = makeDoubleCharConstruct(
 )
 
 const wikilinkConstruct: Construct = { name: 'wikilink', tokenize: tokenizeWikilink }
-const embedConstruct: Construct = { name: 'wikilinkEmbed', tokenize: tokenizeEmbed }
+const embedConstruct: Construct = { name: 'embed', tokenize: tokenizeEmbed }
 export const wikilinks: Extension = {
 	text: {
 		[codes.leftSquareBracket]: wikilinkConstruct,
@@ -273,6 +284,9 @@ const wikilinksFromMarkdown: FromMarkdownExtension = {
 	enter: {
 		wikilink: function (token) {
 			this.enter({ type: 'wikilink', children: [] }, token)
+		},
+		embed: function (token) {
+			this.enter({ type: 'embed', children: [] }, token)
 		},
 		wikilinkTarget: function (token) {
 			this.enter({ type: 'wikilinkTarget', value: this.sliceSerialize(token) }, token)
@@ -286,6 +300,9 @@ const wikilinksFromMarkdown: FromMarkdownExtension = {
 	},
 	exit: {
 		wikilink: function (token) {
+			this.exit(token)
+		},
+		embed: function (token) {
 			this.exit(token)
 		},
 		wikilinkTarget: function (token) {
@@ -322,9 +339,20 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 	if (!pathsToRoutes) return
 
 	return function (tree: Root) {
+		visit(tree, 'embed', (node, index, parent) => {
+			if (parent === undefined || index === undefined) return
+
+			const placeholder: Paragraph = {
+				type: 'paragraph',
+				children: [{ type: 'text', value: '[Pretend this is an embed.]' }]
+			}
+
+			parent.children[index] = placeholder
+		})
+
 		visit(tree, 'wikilink', (node, index, parent) => {
 			// We'll be replacing the entire wikilink node so we need it to have
-			// a parent and a child index
+			// a parent and an index
 			if (parent === undefined || index === undefined) return
 
 			// Each wikilink node needs to parsed into a proper <a> tag
