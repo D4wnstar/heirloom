@@ -1,9 +1,13 @@
 import { markdownLineEnding, markdownSpace } from 'micromark-util-character'
 import { codes } from 'micromark-util-symbol'
-import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types'
+import type { Code, Construct, Extension, Token, Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
 import type { Literal, Parent } from 'mdast'
-import type { Extension as FromMarkdownExtension, Handle } from 'mdast-util-from-markdown'
+import type {
+	CompileContext,
+	Extension as FromMarkdownExtension,
+	Handle
+} from 'mdast-util-from-markdown'
 
 // A wikilink has the following general syntax:
 //
@@ -43,6 +47,15 @@ declare module 'mdast' {
 		wikilinkSection: WikilinkSection
 		wikilinkAlias: WikilinkAlias
 	}
+}
+
+type HrefResolver = (target: string | undefined, section: string | undefined) => string
+
+export interface WikilinkOptions {
+	/**
+	 * Function to resolve a wikilink (target, section) pair (both optional) to an href.
+	 */
+	hrefResolver?: HrefResolver
 }
 
 interface Wikilink extends Parent {
@@ -292,10 +305,30 @@ const enterWikilinkAlias: Handle = function (token) {
 	this.enter(
 		{
 			type: 'wikilinkAlias',
-			value: ' [' + this.sliceSerialize(token) + ']'
+			value: this.sliceSerialize(token)
 		},
 		token
 	)
+}
+
+const exitWikilinkWithResolver = function (
+	context: CompileContext,
+	token: Token,
+	resolver: HrefResolver
+) {
+	const wikilink = context.stack.at(-1) as Wikilink
+	const target = wikilink.children.find((c) => c.type == 'wikilinkTarget')
+	const section = wikilink.children.find((c) => c.type == 'wikilinkSection')
+	const alias = wikilink.children.find((c) => c.type == 'wikilinkAlias')
+
+	// If an alias is defined, override all children with just the alias
+	if (alias) wikilink.children = [alias]
+
+	// Determine the href with the user-given function
+	wikilink.data = wikilink.data ?? {}
+	wikilink.data.hProperties = { href: resolver(target?.value, section?.value) }
+
+	context.exit(token)
 }
 
 const wikilinkConstruct: Construct = { name: 'wikilink', tokenize: tokenizeWikilink }
@@ -315,9 +348,7 @@ const wikilinksFromMarkdown: FromMarkdownExtension = {
 		wikilinkAlias: enterWikilinkAlias
 	},
 	exit: {
-		wikilink: function (token) {
-			this.exit(token)
-		},
+		// wikilink exit is defined in plugin definition because it requires user options
 		wikilinkTarget: function (token) {
 			this.exit(token)
 		},
@@ -333,10 +364,28 @@ const wikilinksFromMarkdown: FromMarkdownExtension = {
 /**
  * Remark plugin to support markdown `[[wikilinks]]`.
  */
-export default function remarkWikilinks() {
+export default function remarkWikilinks(options?: WikilinkOptions) {
 	//@ts-expect-error TS doesn't understand `this`
 	const self = this as Processor<Root>
 	const data = self.data()
+
+	// Add wikilink token exit handler using the user's href resolver
+	const defaultResolver: HrefResolver = (t, s) => {
+		if (t && s) {
+			return `/${t}#${s}`
+		} else if (!t && s) {
+			return `#${s}`
+		} else if (t && !s) {
+			return `/${t}`
+		} else {
+			throw Error('At least one of target and section must be defined in a wikilink')
+		}
+	}
+	const resolver = options?.hrefResolver ?? defaultResolver
+	const exitWikilink: Handle = function (token) {
+		exitWikilinkWithResolver(this, token, resolver)
+	}
+	wikilinksFromMarkdown.exit!['wikilink'] = exitWikilink
 
 	// Register extensions
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
