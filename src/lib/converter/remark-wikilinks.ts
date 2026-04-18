@@ -2,7 +2,7 @@ import { markdownLineEnding, markdownSpace } from 'micromark-util-character'
 import { codes } from 'micromark-util-symbol'
 import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
-import type { Blockquote, Link, Literal, Parent, Root, RootContent } from 'mdast'
+import type { Blockquote, Image, Link, Literal, Parent, Root, RootContent } from 'mdast'
 import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
 import { visit } from 'unist-util-visit'
 import type { Processor } from 'unified'
@@ -338,6 +338,8 @@ export type PageEmbedResolver = (
 	section: string | undefined
 ) => RootContent[]
 
+export type ImageEmbedResolver = (target: string, extension: string) => string | null
+
 export interface WikilinkOptions {
 	/**
 	 * Function to resolve a wikilink `(target, section)` pair to an href.
@@ -352,13 +354,33 @@ export interface WikilinkOptions {
 	 */
 	linkTextResolver?: LinkTextResolver
 	/**
-	 * Function to resolve a wikilink `(target, section)` tuple to an array of MDAST nodes.
+	 * Function to resolve an embed `(target, section)` tuple to an array of MDAST nodes.
 	 * Section is optional. These nodes will be injected in the main document's MDAST in
-	 * place of the embed, within an appropriate container node.
+	 * place of the embed, within an appropriate container node. A processor will be
+	 * passed as an argument to allow processing the target page. To define the processor,
+	 * pass one in these options as `pageEmbedProcessor`.
 	 *
-	 * The default implementation does nothing and simply removes embeds.
+	 * There is no built-in protection against infinite embed loops (e.g. a page embedding
+	 * itself), so this function needs to handle that.
+	 *
+	 * The default implementation return an empty array (and therefore removes embeds).
 	 */
 	pageEmbedResolver?: PageEmbedResolver
+	/**
+	 * Function to resolve an embed target to an image URL. The target extension is
+	 * provided for convenience. The URL will be used as the `<img>` tag's `href`.
+	 * The function may return null to represent a broken or nonexistent URl.
+	 *
+	 * The default implementation returns null (and therefore removes embeds).
+	 */
+	imageEmbedResolver?: ImageEmbedResolver
+	/**
+	 * The processor passed to `pageEmbedResolver`. You probably want to use this
+	 * to `parse` and `run` (but not `stringify`) the target page, then return the
+	 * appropriate nodes. Be sure to not use `remark-rehype` as you want MDAST nodes.
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	pageEmbedProcessor?: Processor<any, any, any, any, any>
 }
 
 const defaultHrefResolver: HrefResolver = (target, section) => {
@@ -386,10 +408,12 @@ const defaultLinkTextResolver: LinkTextResolver = (target, section, alias) => {
 
 const defaultPageEmbedResolver: PageEmbedResolver = () => []
 
+const defaultImageEmbedResolver: ImageEmbedResolver = () => null
+
 /**
  * Remark plugin to support markdown `[[wikilinks]]`.
  */
-export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) {
+export default function remarkWikilinks(options: WikilinkOptions = {}) {
 	//@ts-expect-error TS doesn't understand `this`
 	const self = this as Processor
 	const data = self.data()
@@ -397,6 +421,8 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 	const hrefResolver = options.hrefResolver ?? defaultHrefResolver
 	const linkTextResolver = options.linkTextResolver ?? defaultLinkTextResolver
 	const pageEmbedResolver = options.pageEmbedResolver ?? defaultPageEmbedResolver
+	const imageEmbedResolver = options.imageEmbedResolver ?? defaultImageEmbedResolver
+	const pageEmbedProcessor = options.pageEmbedProcessor ?? self
 
 	// Register extensions
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
@@ -417,7 +443,6 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 			}
 			const target = wikilink.children.find((n) => n.type === 'wikilinkTarget')?.value
 			const section = wikilink.children.find((n) => n.type === 'wikilinkSection')?.value
-			//const alias = wikilink.children.find((n) => n.type === 'wikilinkAlias')?.value
 
 			if (!target) {
 				console.warn(`No target found in embed`)
@@ -429,14 +454,12 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 				return
 			}
 
-			// A text embed is just a big blockquote containing all the text of the
-			// embedded page. A media embed is more complicated and depends on the kind
-			// of medium that's embedded.
-
 			// Check if it's a media embed by seeing if there is a file extension
-			const isMedia = /\..*/.test(target)
-			if (!isMedia) {
-				const embedNodes = pageEmbedResolver(self, target, section)
+			const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+			const extMatch = target.match(/\.(.*)/)
+			if (!extMatch || extMatch[1].toLowerCase() === 'md') {
+				// A text embed is just a blockquote containing the embedded page
+				const embedNodes = pageEmbedResolver(pageEmbedProcessor, target, section)
 				if (!embedNodes) return
 				const pageEmbed: Blockquote = {
 					type: 'blockquote',
@@ -444,6 +467,17 @@ export default function remarkWikilinks(options: Partial<WikilinkOptions> = {}) 
 					children: embedNodes
 				}
 				parent.children[index] = pageEmbed
+			} else {
+				// A media embed is more complicated and depends on the file type
+				const ext = extMatch[1].toLowerCase()
+				if (IMAGE_EXTS.includes(ext)) {
+					const url = imageEmbedResolver(target, ext)
+					if (!url) return
+					const image: Image = { type: 'image', url }
+					parent.children[index] = image
+				} else {
+					return // TODO: Support other file types
+				}
 			}
 		})
 

@@ -46,4 +46,5 @@ export interface Manifest {
 	navTree: Tree
 	slugsToPaths: Record<string, string>
 	pathsToRoutes: Record<string, string>
+	mediaPaths: string[]
 }

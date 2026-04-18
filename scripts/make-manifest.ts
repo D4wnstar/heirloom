@@ -30,6 +30,9 @@ const slugsToPaths = resolveSlugs(fileMetadata)
 const pathsToRoutes = Object.fromEntries(
 	Object.entries(slugsToPaths).map(([slug, path]) => [path, '/wiki/' + slug])
 )
+const mediaPaths = entries
+	.filter((e) => e.isFile() && !e.name.endsWith('.md'))
+	.map((e) => `${relative(assetsDir, e.parentPath)}${path.sep}${e.name}`)
 
 // Set settings and the navigation tree
 const wikiSettings: WikiSettings = {
@@ -64,6 +67,7 @@ const manifest: Manifest = {
 	wikiSettings,
 	slugsToPaths,
 	pathsToRoutes,
+	mediaPaths,
 	navTree: root.children
 }
 

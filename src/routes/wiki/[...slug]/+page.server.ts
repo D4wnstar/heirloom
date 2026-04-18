@@ -6,10 +6,10 @@ import type { EntryGenerator, PageServerLoad } from './$types'
 import { readFileSync } from 'fs'
 
 export const load = (async ({ params: { slug }, parent }) => {
-	const layoutData = await parent()
-	const path = layoutData.slugsToPaths[slug]
+	const manifest = await parent()
+	const path = manifest.slugsToPaths[slug]
 	if (!path) error(404, `No path found for slug ${slug}`)
-	return fetchPage(path, layoutData.pathsToRoutes)
+	return fetchPage(path, manifest)
 }) satisfies PageServerLoad
 
 export const entries: EntryGenerator = async () => {

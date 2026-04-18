@@ -187,7 +187,7 @@ $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\ome
 ![[Wave equation#Introduction to waves]]
 
 ### Media
-![[Cat.jpg]]
+![[Cat.jpg|300]]
 
 # Mermaid graphs
 ```mermaid

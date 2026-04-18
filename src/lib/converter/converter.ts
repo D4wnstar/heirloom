@@ -22,7 +22,11 @@ import remarkGfm from 'remark-gfm'
 import remarkHighlights from './remark-highlights'
 import remarkComments from './remark-comments'
 import remarkCallouts from './remark-callouts'
-import remarkWikilinks, { type HrefResolver, type PageEmbedResolver } from './remark-wikilinks'
+import remarkWikilinks, {
+	type HrefResolver,
+	type ImageEmbedResolver,
+	type PageEmbedResolver
+} from './remark-wikilinks'
 import remarkHeadingIds from './remark-heading-ids'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
@@ -31,7 +35,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeExternalLinks from 'rehype-external-links'
 // import rehypeMermaid from 'rehype-mermaid'
 import { matter } from 'vfile-matter'
-import type { Frontmatter } from '$lib/types'
+import type { Frontmatter, Manifest } from '$lib/types'
 import { join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
 import { readFileSync } from 'fs'
@@ -41,8 +45,8 @@ function preprocessMarkdown(md: string) {
 	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
 }
 
-export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, string>) {
-	const getPath = (target: string) => {
+export function markdownToHtml(markdown: string, manifest: Manifest) {
+	const getPath = (target: string, paths: string[]) => {
 		// The target can be a file name or a file path
 		// TODO: Check that / is always the correct path separator
 		if (target.includes('/')) return target
@@ -50,7 +54,6 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 		// If it's a name (stem, without ext), we can't be sure if it's unique or not
 		// In this case, we get the first path whose name is equal to the
 		// given name. This check also needs to be case-insensitive
-		const paths = Object.keys(pathsToRoutes)
 		const path = paths.find((path) => {
 			const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
 			return fileStem?.toLowerCase() === target.toLowerCase()
@@ -59,11 +62,12 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 	}
 
 	const hrefResolver: HrefResolver = (target, section) => {
+		const pathsToRoutes = manifest.pathsToRoutes
 		if (target && section) {
-			const path = getPath(target)
+			const path = getPath(target, Object.keys(pathsToRoutes))
 			return path ? `${pathsToRoutes[path]}#${section}` : null
 		} else if (target && !section) {
-			const path = getPath(target)
+			const path = getPath(target, Object.keys(pathsToRoutes))
 			return path ? pathsToRoutes[path] : null
 		} else if (!target && section) {
 			// This is an internal #Section link
@@ -76,16 +80,31 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 		}
 	}
 
+	const imageEmbedResolver: ImageEmbedResolver = (target, extension) => {
+		const path = getPath(target, manifest.mediaPaths)
+		if (!path) return null // TODO: Make a broken embed placeholder
+		const filepath = join(ASSETS_FOLDER, path)
+		const base64 = readFileSync(filepath, 'base64')
+		return `data:image/${extension};base64,${base64}`
+	}
+
+	// Prevent infinite recursion by disallowing embedding a page within itself
+	const embedsInProgress = new Set<string>()
+
 	const pageEmbedResolver: PageEmbedResolver = (processor, target, section) => {
-		const path = getPath(target)
-		if (!path) return [] // TODO: Make a broken embed placeholder
+		const path = getPath(target, Object.keys(manifest.pathsToRoutes))
+		if (!path || embedsInProgress.has(target)) return [] // TODO: Make a broken embed placeholder
+
+		embedsInProgress.add(target)
 		const filepath = join(ASSETS_FOLDER, path)
 		const markdown = preprocessMarkdown(readFileSync(filepath, 'utf-8'))
 		const ast = processor.parse(markdown) as Root
+		const tAst = processor.runSync(ast) as Root
+		embedsInProgress.delete(target)
 
 		if (section) {
 			// Find the start and end index of the section nodes we want to isolate
-			const sectionStartIndex = ast.children.findIndex(
+			const sectionStartIndex = tAst.children.findIndex(
 				(n) =>
 					n.type === 'heading' &&
 					//@ts-expect-error TS LSP doesn't understand hasOwn
@@ -93,7 +112,7 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 			)
 			if (sectionStartIndex === -1) return []
 
-			let sectionEndIndex: number | undefined = ast.children.slice(sectionStartIndex).findIndex(
+			let sectionEndIndex: number | undefined = tAst.children.slice(sectionStartIndex).findIndex(
 				(n) =>
 					n.type === 'heading' &&
 					//@ts-expect-error TS LSP doesn't understand hasOwn
@@ -105,11 +124,23 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 				sectionEndIndex += sectionStartIndex
 			}
 
-			return ast.children.slice(sectionStartIndex, sectionEndIndex)
+			return tAst.children.slice(sectionStartIndex, sectionEndIndex)
 		} else {
-			return ast.children
+			return tAst.children
 		}
 	}
+
+	const pageEmbedProcessor = unified()
+		.use(remarkParse)
+		.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
+		.use(() => (_, file) => matter(file)) // Export frontmatter to the VFile
+		.use(remarkGfm)
+		.use(remarkHighlights)
+		.use(remarkComments)
+		.use(remarkCallouts)
+		.use(remarkWikilinks, { hrefResolver, pageEmbedResolver, imageEmbedResolver })
+		.use(remarkHeadingIds)
+		.use(remarkMath)
 
 	const processor = unified()
 		.use(remarkParse)
@@ -119,7 +150,12 @@ export function markdownToHtml(markdown: string, pathsToRoutes: Record<string, s
 		.use(remarkHighlights)
 		.use(remarkComments)
 		.use(remarkCallouts)
-		.use(remarkWikilinks, { hrefResolver, pageEmbedResolver })
+		.use(remarkWikilinks, {
+			hrefResolver,
+			pageEmbedResolver,
+			imageEmbedResolver,
+			pageEmbedProcessor
+		})
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkRehype, { allowDangerousHtml: true })
