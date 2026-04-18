@@ -2,6 +2,7 @@
 	import Breadcrumbs from '$lib/components/content/Breadcrumbs.svelte'
 	import Extras from '$lib/components/content/Extras.svelte'
 	import ImageWithModal from '$lib/components/content/ImageWithModal.svelte'
+	import mermaid from 'mermaid'
 	import { mount } from 'svelte'
 
 	// This file and the front page one should always be synced
@@ -85,13 +86,13 @@
 		})
 	}
 
+	// mermaid.initialize({ darkMode: true })
 	// Update page content every time it changes
 	$effect(() => {
 		data.html
 		initializeCollapsibleCallouts()
 		initializeImageModals()
-		//@ts-expect-error provided by the global mermaid script
-		mermaid.run()
+		// mermaid.run()
 
 		// Clean up event listeners each effect and when component unmounts
 		return () => {

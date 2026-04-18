@@ -30,10 +30,10 @@ import remarkWikilinks, {
 import remarkHeadingIds from './remark-heading-ids'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
+import rehypeMermaid from 'rehype-mermaid'
 import rehypePrism from 'rehype-prism-plus'
 import rehypeKatex from 'rehype-katex'
 import rehypeExternalLinks from 'rehype-external-links'
-// import rehypeMermaid from 'rehype-mermaid'
 import { matter } from 'vfile-matter'
 import type { Frontmatter, Manifest } from '$lib/types'
 import { join } from 'path'
@@ -45,7 +45,7 @@ function preprocessMarkdown(md: string) {
 	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
 }
 
-export function markdownToHtml(markdown: string, manifest: Manifest) {
+export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	const getPath = (target: string, paths: string[]) => {
 		// The target can be a file name or a file path
 		// TODO: Check that / is always the correct path separator
@@ -158,9 +158,10 @@ export function markdownToHtml(markdown: string, manifest: Manifest) {
 		})
 		.use(remarkHeadingIds)
 		.use(remarkMath)
+		// .use(remarkMermaidLite)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeKatex)
-		// .use(rehypeMermaid)
+		.use(rehypeMermaid)
 		.use(rehypePrism, { defaultLanguage: 'markdown' })
 		.use(rehypeExternalLinks)
 		.use(rehypeStringify, { allowDangerousHtml: true })
@@ -168,7 +169,7 @@ export function markdownToHtml(markdown: string, manifest: Manifest) {
 	// remarkMath has nonstandard syntax for block math, so we fix it here
 	markdown = preprocessMarkdown(markdown)
 
-	const vfile = processor.processSync(markdown)
+	const vfile = await processor.process(markdown)
 	const frontmatter = vfile.data.frontmatter as Frontmatter
 	const title = undefined // TODO: Add a frontmatter property later
 

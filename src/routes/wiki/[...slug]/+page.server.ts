@@ -9,7 +9,7 @@ export const load = (async ({ params: { slug }, parent }) => {
 	const manifest = await parent()
 	const path = manifest.slugsToPaths[slug]
 	if (!path) error(404, `No path found for slug ${slug}`)
-	return fetchPage(path, manifest)
+	return await fetchPage(path, manifest)
 }) satisfies PageServerLoad
 
 export const entries: EntryGenerator = async () => {

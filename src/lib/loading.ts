@@ -11,11 +11,11 @@ export const MANIFEST_PATH = join(ASSETS_FOLDER, 'manifest.json')
  * @param filepath The path to the markdown file (relative to the assets directory)
  * @returns The processed page object with HTML content
  */
-export function fetchPage(filepath: string, manifest: Manifest) {
+export async function fetchPage(filepath: string, manifest: Manifest) {
 	const assetPath = join(ASSETS_FOLDER, filepath)
 	console.log('PROCESSING:', assetPath)
 	const markdownContent = readFileSync(assetPath, 'utf-8')
-	const { html, title, frontmatter } = markdownToHtml(markdownContent, manifest)
+	const { html, title, frontmatter } = await markdownToHtml(markdownContent, manifest)
 
 	const titleFromPath = filepath.split(path.sep).at(-1)?.replace(/\.md$/, '') ?? 'Placeholder'
 
