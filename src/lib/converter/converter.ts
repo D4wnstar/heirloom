@@ -41,7 +41,7 @@ import { join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
 import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
-import rehypeMermaidInk from './reype-mermaid-ink'
+import rehypeMermaidInk from './rehype-mermaid-ink'
 
 declare module 'vfile' {
 	interface DataMap {
