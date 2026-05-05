@@ -2,7 +2,6 @@
 	import Breadcrumbs from '$lib/components/content/Breadcrumbs.svelte'
 	import Extras from '$lib/components/content/Extras.svelte'
 	import ImageWithModal from '$lib/components/content/ImageWithModal.svelte'
-	import mermaid from 'mermaid'
 	import { mount } from 'svelte'
 
 	// This file and the front page one should always be synced
@@ -19,23 +18,23 @@
 	})
 
 	// Store references to event listeners for cleanup
-	let eventListeners: Array<{ element: HTMLElement; handler: EventListener }> = []
+	let eventListeners: Array<{ element: HTMLElement; handler: () => void }> = []
 
 	function initializeCollapsibleCallouts() {
 		// Add event listeners to all collapsible callouts
-		document.querySelectorAll('.callout.is-collapsible').forEach((callout) => {
+		document.querySelectorAll('.callout.collapsible').forEach((callout) => {
 			const title = callout.querySelector('.callout-title') as HTMLElement | null
 			const content = callout.querySelector('.callout-content') as HTMLElement | null
 			const fold = callout.querySelector('.callout-fold') as HTMLElement | null
 			const svg = fold?.querySelector('svg') as SVGElement | null
 
 			if (title && content) {
-				content.style.display = callout.classList.contains('is-collapsed') ? 'none' : 'block'
+				content.style.display = callout.classList.contains('collapsed') ? 'none' : 'block'
 
-				const clickHandler: EventListener = () => {
-					callout.classList.toggle('is-collapsed')
+				const clickHandler = () => {
+					callout.classList.toggle('collapsed')
 
-					const isNowCollapsed = callout.classList.contains('is-collapsed')
+					const isNowCollapsed = callout.classList.contains('collapsed')
 					content.style.display = isNowCollapsed ? 'none' : 'block'
 
 					// Rotate SVG icon if it exists
@@ -86,13 +85,11 @@
 		})
 	}
 
-	// mermaid.initialize({ darkMode: true })
 	// Update page content every time it changes
 	$effect(() => {
 		data.html
 		initializeCollapsibleCallouts()
 		initializeImageModals()
-		// mermaid.run()
 
 		// Clean up event listeners each effect and when component unmounts
 		return () => {
