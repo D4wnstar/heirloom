@@ -369,7 +369,7 @@ export interface WikilinkOptions {
 	/**
 	 * Function to resolve an embed target to an image URL. The target extension is
 	 * provided for convenience. The URL will be used as the `<img>` tag's `href`.
-	 * The function may return null to represent a broken or nonexistent URl.
+	 * The function may return null to represent a broken or nonexistent URL.
 	 *
 	 * The default implementation returns null (and therefore removes embeds).
 	 */

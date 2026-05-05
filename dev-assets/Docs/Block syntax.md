@@ -14,31 +14,27 @@ The rest of this section should be empty.
 The rest of this section should be empty.
 :::
 
-### Inline image
+### Captioned figure
 ```
-:::image
-![[cat.jpg|300]]
+:::figure[cat.jpg]
 A *scrunkly* cat.
 :::
 ```
 
-:::image
-![[cat.jpg|300]]
+:::figure[cat.jpg]
 A *scrunkly* cat.
 :::
 
-### Sidebar image
+### Sidebar figure
 ```
-:::image{sidebar}
-![[cat.jpg|300]]
+:::figure[cat.jpg]{sidebar}
 A *scrunkly* cat.
 :::
 ```
 
 You should see an image in the sidebar of this page, with a caption.
 
-:::image{sidebar}
-![[cat.jpg|300]]
+:::figure[cat.jpg]{sidebar}
 A *scrunkly* cat.
 :::
 

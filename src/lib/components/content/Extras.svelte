@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Detail, Image } from '$lib/converter/remark-heirloom-directives'
+	import type { Detail, ImageData } from '$lib/converter/remark-heirloom-directives'
 	import Details from './Details.svelte'
 	import ImageWithModal from './ImageWithModal.svelte'
 
 	interface Props {
-		sidebarImages: Image[]
+		sidebarImages: ImageData[]
 		details: Detail[]
 	}
 

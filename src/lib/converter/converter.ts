@@ -167,7 +167,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkDirective)
-		.use(remarkHeirloomDirectives, { inlineTextProcessor })
+		.use(remarkHeirloomDirectives, { inlineTextProcessor, imageEmbedResolver })
 
 	const processor = unified()
 		.use(remarkParse)
@@ -186,7 +186,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkDirective)
-		.use(remarkHeirloomDirectives, { inlineTextProcessor })
+		.use(remarkHeirloomDirectives, { inlineTextProcessor, imageEmbedResolver })
 		// .use(remarkMermaidLite)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeKatex)
