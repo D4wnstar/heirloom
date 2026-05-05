@@ -43,6 +43,12 @@ import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
 import remarkHeirloomDirectives from './remark-heirloom-directives'
 
+declare module 'vfile' {
+	interface DataMap {
+		frontmatter?: Frontmatter
+	}
+}
+
 function preprocessMarkdown(md: string) {
 	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
 }
@@ -132,6 +138,24 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		}
 	}
 
+	/**
+	 * Processor to handle MD to HTML conversion of inline text only.
+	 * This is used whenever brief spans of content need to be handled
+	 * separately from the main document, such as sidebar image captions
+	 * and sidebar details.
+	 */
+	const inlineTextProcessor = unified()
+		.use(remarkParse)
+		.use(remarkGfm) // NOTE: This adds support for a bunch of block content too
+		.use(remarkHighlights)
+		.use(remarkComments)
+		.use(remarkWikilinks, { hrefResolver }) // Don't support embeds in inline
+		.use(remarkMath)
+		.use(remarkRehype, { allowDangerousHtml: true })
+		.use(rehypeKatex)
+		.use(rehypeExternalLinks)
+		.use(rehypeStringify, { allowDangerousHtml: true })
+
 	const pageEmbedProcessor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
@@ -143,7 +167,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkDirective)
-		.use(remarkHeirloomDirectives)
+		.use(remarkHeirloomDirectives, { inlineTextProcessor })
 
 	const processor = unified()
 		.use(remarkParse)
@@ -162,7 +186,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkDirective)
-		.use(remarkHeirloomDirectives)
+		.use(remarkHeirloomDirectives, { inlineTextProcessor })
 		// .use(remarkMermaidLite)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeKatex)
@@ -175,12 +199,16 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	markdown = preprocessMarkdown(markdown)
 
 	const vfile = await processor.process(markdown)
-	const frontmatter = vfile.data.frontmatter as Frontmatter
+	const frontmatter = vfile.data.frontmatter
+	const sidebarImages = vfile.data.sidebarImages ?? []
+	const details = vfile.data.details ?? []
 	const title = undefined // TODO: Add a frontmatter property later
 
 	return {
 		html: String(vfile),
 		title,
-		frontmatter
+		frontmatter,
+		sidebarImages,
+		details
 	}
 }

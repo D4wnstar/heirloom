@@ -1,17 +1,27 @@
-import type { PhrasingContent, Root } from 'mdast'
-import type { Plugin } from 'unified'
+import type { Root } from 'mdast'
+import type { Plugin, Processor } from 'unified'
 import { SKIP, visit } from 'unist-util-visit'
 
 declare module 'vfile' {
 	interface DataMap {
-		sidebarImages?: SidebarImage[]
-		details?: Record<string, string>
+		sidebarImages?: Image[]
+		details?: Detail[]
 	}
 }
 
-export interface SidebarImage {
+export interface Image {
 	url: string
 	caption: string | null
+}
+
+export interface Detail {
+	key: string
+	value: string
+}
+
+export interface HeirloomDirectivesOptions {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	inlineTextProcessor: Processor<any, any, any, any, any>
 }
 
 /**
@@ -19,7 +29,7 @@ export interface SidebarImage {
  * See the markdown directives proposal at
  * https://talk.commonmark.org/t/generic-directives-plugins-syntax/444.
  */
-const remarkHeirloomDirectives: Plugin<[], Root> = function () {
+const remarkHeirloomDirectives: Plugin<[HeirloomDirectivesOptions], Root> = function (options) {
 	return function (tree, file) {
 		if (!file.data.sidebarImages) {
 			file.data.sidebarImages = []
@@ -50,16 +60,9 @@ const remarkHeirloomDirectives: Plugin<[], Root> = function () {
 				const embed = para.children[0]
 				if (embed.type !== 'image') return
 
-				// TODO: The caption needs to be a rendered HTML string
-				const captionNodes = para.children.slice(1)
-				let caption: string | null = ''
-				for (let node of captionNodes) {
-					if (Object.hasOwn(node, 'value')) {
-						node = node as Extract<PhrasingContent, { value: string }>
-						caption += node.value
-					}
-				}
-				caption = caption ?? null
+				const captionRoot: Root = { type: 'root', children: para.children.slice(1) }
+				const captionTemp: Root = options.inlineTextProcessor.runSync(captionRoot)
+				const caption: string | null = options.inlineTextProcessor.stringify(captionTemp) ?? null
 
 				if (node.attributes && 'sidebar' in node.attributes && file.data.sidebarImages) {
 					// Save and remove block from the main content
@@ -75,8 +78,6 @@ const remarkHeirloomDirectives: Plugin<[], Root> = function () {
 				// TODO
 			}
 		})
-
-		console.log('VFILE DATA:', file.data)
 	}
 }
 

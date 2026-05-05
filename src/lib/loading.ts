@@ -15,7 +15,10 @@ export async function fetchPage(filepath: string, manifest: Manifest) {
 	const assetPath = join(ASSETS_FOLDER, filepath)
 	console.log('PROCESSING:', assetPath)
 	const markdownContent = readFileSync(assetPath, 'utf-8')
-	const { html, title, frontmatter } = await markdownToHtml(markdownContent, manifest)
+	const { html, title, frontmatter, sidebarImages, details } = await markdownToHtml(
+		markdownContent,
+		manifest
+	)
 
 	const titleFromPath = filepath.split(path.sep).at(-1)?.replace(/\.md$/, '') ?? 'Placeholder'
 
@@ -23,7 +26,9 @@ export async function fetchPage(filepath: string, manifest: Manifest) {
 		html,
 		title: title ?? titleFromPath,
 		path: filepath,
-		frontmatter
+		frontmatter,
+		sidebarImages,
+		details
 	}
 }
 

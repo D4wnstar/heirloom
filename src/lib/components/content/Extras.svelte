@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { DetailsData, SidebarImageData } from '$lib/types'
+	import type { Detail, Image } from '$lib/converter/remark-heirloom-directives'
 	import Details from './Details.svelte'
 	import ImageWithModal from './ImageWithModal.svelte'
 
 	interface Props {
-		sidebarImages: SidebarImageData[]
-		details: DetailsData[]
+		sidebarImages: Image[]
+		details: Detail[]
 	}
 
 	let { sidebarImages, details }: Props = $props()
@@ -14,7 +14,7 @@
 {#if sidebarImages.length > 0}
 	<div id="sidebar-images" class="space-y-6">
 		{#each sidebarImages as img}
-			<ImageWithModal url="/api/image/{encodeURIComponent(img.path)}" caption={img.caption} />
+			<ImageWithModal url={img.url} caption={img.caption} />
 		{/each}
 	</div>
 

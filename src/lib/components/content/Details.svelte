@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { DetailsData } from '$lib/types'
+	import type { Detail } from '$lib/converter/remark-heirloom-directives'
 	import { Library } from 'lucide-svelte'
 
 	interface Props {
-		details: DetailsData[]
+		details: Detail[]
 	}
 
 	let { details }: Props = $props()
@@ -13,14 +13,14 @@
 	<h3 class="h3"><Library class="inline" /> Details</h3>
 	<table class="w-full">
 		<tbody class="pre-html">
-			{#each details as detail}
+			{#each details as { key, value }}
 				<tr>
-					{#if detail.value}
-						<td class="px-1 align-text-top lg:min-w-[6em]">{@html detail.key}</td>
-						<td class="px-1">{@html detail.value}</td>
-					{:else if detail.key}
+					{#if value}
+						<td class="px-1 align-text-top lg:min-w-[6em]">{@html key}</td>
+						<td class="px-1">{@html value}</td>
+					{:else if key}
 						<td colspan="2" class="pt-2 text-center">
-							<header class="text-lg">{@html detail.key}</header>
+							<header class="text-lg">{@html key}</header>
 							<hr class="mt-1 pb-2 border-surface-700-300" />
 						</td>
 					{:else}
