@@ -30,6 +30,7 @@ import remarkWikilinks, {
 import remarkHeadingIds from './remark-heading-ids'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
+import remarkDirective from 'remark-directive'
 import rehypeMermaid from 'rehype-mermaid'
 import rehypePrism from 'rehype-prism-plus'
 import rehypeKatex from 'rehype-katex'
@@ -40,6 +41,7 @@ import { join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
 import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
+import remarkHeirloomDirectives from './remark-heirloom-directives'
 
 function preprocessMarkdown(md: string) {
 	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
@@ -133,7 +135,6 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	const pageEmbedProcessor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
-		.use(() => (_, file) => matter(file)) // Export frontmatter to the VFile
 		.use(remarkGfm)
 		.use(remarkHighlights)
 		.use(remarkComments)
@@ -141,6 +142,8 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkWikilinks, { hrefResolver, pageEmbedResolver, imageEmbedResolver })
 		.use(remarkHeadingIds)
 		.use(remarkMath)
+		.use(remarkDirective)
+		.use(remarkHeirloomDirectives)
 
 	const processor = unified()
 		.use(remarkParse)
@@ -158,6 +161,8 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		})
 		.use(remarkHeadingIds)
 		.use(remarkMath)
+		.use(remarkDirective)
+		.use(remarkHeirloomDirectives)
 		// .use(remarkMermaidLite)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeKatex)

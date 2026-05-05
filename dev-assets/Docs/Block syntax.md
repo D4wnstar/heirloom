@@ -29,7 +29,7 @@ A *scrunkly* cat.
 
 ### Sidebar image
 ```
-:::image(sidebar)
+:::image{sidebar}
 ![[cat.jpg|300]]
 A *scrunkly* cat.
 :::
@@ -37,7 +37,7 @@ A *scrunkly* cat.
 
 You should see an image in the sidebar of this page, with a caption.
 
-:::image(sidebar)
+:::image{sidebar}
 ![[cat.jpg|300]]
 A *scrunkly* cat.
 :::
