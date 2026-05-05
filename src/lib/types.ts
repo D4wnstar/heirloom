@@ -13,6 +13,7 @@ export type WikiSettings = {
 	frontPage: {
 		path: string
 	}
+	allowMermaidInk: boolean
 }
 
 export type Frontmatter = {
@@ -21,6 +22,7 @@ export type Frontmatter = {
 	'wiki-frontpage'?: boolean
 	'wiki-disambiguation'?: string
 	'wiki-project-title'?: string
+	'wiki-allow-mermaid-ink'?: boolean
 } & Record<string, unknown>
 
 export interface Folder {

@@ -37,7 +37,8 @@ const mediaPaths = entries
 // Set settings and the navigation tree
 const wikiSettings: WikiSettings = {
 	title: 'Awesome Wiki',
-	frontPage: { path: '' }
+	frontPage: { path: '' },
+	allowMermaidInk: false
 }
 
 for (const { file, frontmatter, relPathParent } of fileMetadata) {
@@ -45,6 +46,8 @@ for (const { file, frontmatter, relPathParent } of fileMetadata) {
 		// The front page contains the wiki settings
 		// All settings have defaults so this just updates them if needed
 		if (frontmatter['wiki-project-title']) wikiSettings.title = frontmatter['wiki-project-title']
+		if (frontmatter['wiki-allow-mermaid-ink'])
+			wikiSettings.allowMermaidInk = frontmatter['wiki-allow-mermaid-ink']
 
 		// Store the front page separately
 		wikiSettings.frontPage = { path: file.path }

@@ -31,7 +31,7 @@ import remarkHeadingIds from './remark-heading-ids'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMath from 'remark-math'
 import remarkDirective from 'remark-directive'
-import rehypeMermaid from 'rehype-mermaid'
+import remarkHeirloomDirectives from './remark-heirloom-directives'
 import rehypePrism from 'rehype-prism-plus'
 import rehypeKatex from 'rehype-katex'
 import rehypeExternalLinks from 'rehype-external-links'
@@ -41,7 +41,7 @@ import { join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
 import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
-import remarkHeirloomDirectives from './remark-heirloom-directives'
+import rehypeMermaidInk from './reype-mermaid-ink'
 
 declare module 'vfile' {
 	interface DataMap {
@@ -187,10 +187,13 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkHeirloomDirectives, { inlineTextProcessor, imageEmbedResolver })
-		// .use(remarkMermaidLite)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeKatex)
-		.use(rehypeMermaid)
+
+	// Must be before rehypePrism!
+	if (manifest.wikiSettings.allowMermaidInk) processor.use(rehypeMermaidInk)
+
+	processor
 		.use(rehypePrism, { defaultLanguage: 'markdown' })
 		.use(rehypeExternalLinks)
 		.use(rehypeStringify, { allowDangerousHtml: true })
