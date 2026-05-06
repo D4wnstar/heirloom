@@ -500,9 +500,10 @@ export default function remarkWikilinks(options: WikilinkOptions = {}) {
 				}
 				parent.children[index] = goodLink
 			} else {
+				const theoreticalUrl = target ? target.replaceAll(' ', '_') : '/missing'
 				const brokenLink: Link = {
 					type: 'link',
-					url: '/broken', // TODO: Determine where broken links should go
+					url: theoreticalUrl,
 					children: [{ type: 'text', value: linkText }],
 					data: { hProperties: { class: 'broken-link' } }
 				}

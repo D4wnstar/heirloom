@@ -35,14 +35,14 @@ import remarkHeirloomDirectives from './remark-heirloom-directives'
 import rehypePrism from 'rehype-prism-plus'
 import rehypeKatex from 'rehype-katex'
 import rehypeExternalLinks from 'rehype-external-links'
+import rehypeMermaidInk from './rehype-mermaid-ink'
+import rehypePermalinks from './rehype-permalinks'
 import { matter } from 'vfile-matter'
 import type { Frontmatter, Manifest } from '$lib/types'
 import { join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
 import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
-import rehypeMermaidInk from './rehype-mermaid-ink'
-import rehypePermalinks from './rehype-permalinks'
 
 declare module 'vfile' {
 	interface DataMap {

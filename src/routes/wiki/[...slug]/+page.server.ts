@@ -8,7 +8,7 @@ import { readFileSync } from 'fs'
 export const load = (async ({ params: { slug }, parent }) => {
 	const manifest = await parent()
 	const path = manifest.slugsToPaths[slug]
-	if (!path) error(404, `No path found for slug ${slug}`)
+	if (!path) error(404, `No path found for slug '${slug}'`)
 	return await fetchPage(path, manifest)
 }) satisfies PageServerLoad
 
