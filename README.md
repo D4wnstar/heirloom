@@ -1,5 +1,16 @@
-# Wiki Generator Website Template
+# Heirloom
+> A minimal but powerful markdown site builder for the ages.
 
-This is the website template for the [Wiki Generator](https://github.com/D4wnstar/wiki-generator) plugin for [Obsidian.md](https://obsidian.md/). This is the code that will create and style your website. You can start using it by pressing the big **Deploy** button just below. Provided you are logged into [Vercel](https://vercel.com), it'll prompt you to copy the website by creating a new Project. Just follow the instructions and it'll be up and running in no time.
+## Overview
+**Heirloom** is a static site generator designed for simplicity and permanence. Content is plain markdown, stored in a regular git repository, and rendered to static HTML through the [unified](https://unifiedjs.com/) ecosystem. The built website has zero external runtime dependencies, vendor-locking and is suitable for running on any static site host whatsoever (or even locally).
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FD4wnstar%2Fwiki-generator-template%2Ftree%2Fmain&env=TURSO_URL,TURSO_AUTH_TOKEN,JWT_SECRET&envDescription=API%20keys%20needed%20to%20connect%20to%20Turso%20and%20to%20handle%20users.%20Make%20sure%20your%20Turso%20database%20is%20initialized!)
+Markdown syntax or transformation support can be added or removed as simply as adding or removing a unified plugin in the code. Moreover, since the markdown source of a Heirloom website is just an ordinary git repository, collaborating on writing and editing the website's content is the same as collaborating on any other git project.
+
+This repository contains the Heirloom SvelteKit code that you can clone to start your own website. The markdown converter is built directly into the website, so there's no need for a separate tool. To use Heirloom:
+1. Clone this repository into your own repository (forking or using the template feature on GitHub is useful for this).
+2. Link it to any website hosting service of your preference.
+3. In the host, set the `HEIRLOOM_SOURCE_REPO_URL` environment variable to the repository with the markdown you want to publish.
+4. Set the `hl-publish` frontmatter property to `true` on all markdown files you want to put on the website.
+5. Deploy.
+
+Heirloom will automatically grab all markdown files with `hl-publish: true` and make them into website pages. Links, navigation and everything else is handled automatically. And if you want to handle deployment more manually, you can build the project locally on your machine: SvelteKit will put the compiled site in the `build` folder for you to do whatever you like with it.
