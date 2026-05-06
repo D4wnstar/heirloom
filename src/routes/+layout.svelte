@@ -43,7 +43,7 @@
 			<Menu />
 		</button>
 		<a href="/">
-			<strong class="text-primary-950-50 type-scale-5">{data.wikiSettings.title}</strong>
+			<strong class="text-primary-950-50 type-scale-5">{data.projectSettings.title}</strong>
 		</a>
 	{/snippet}
 	{#snippet trail()}

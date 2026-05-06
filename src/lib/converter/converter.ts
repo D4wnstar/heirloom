@@ -192,7 +192,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(rehypeKatex)
 
 	// Must be before rehypePrism!
-	if (manifest.wikiSettings.allowMermaidInk) processor.use(rehypeMermaidInk)
+	if (manifest.projectSettings.allowMermaidInk) processor.use(rehypeMermaidInk)
 
 	processor
 		.use(rehypePrism, { defaultLanguage: 'markdown' })

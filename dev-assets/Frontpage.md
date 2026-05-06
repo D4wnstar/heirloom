@@ -1,11 +1,13 @@
 ---
-wiki-frontpage: true
-wiki-publish: true
-# The front page is also the place to configure the wiki
-wiki-project-title: 'WikiGen Dev Assets'
-wiki-allow-mermaid-ink: true
+hl-frontpage: true
+hl-publish: true
+# The front page is also the place to configure the website
+hl-project-title: 'Heirloom Dev Assets'
+hl-allow-mermaid-ink: true
 ---
 
-# Wiki Generator
+# Heirloom
 
-A framework to make collaborative websites from markdown. This should be the front page.
+> A minimal but powerful markdown site builder for the ages.
+
+This should be the front page.

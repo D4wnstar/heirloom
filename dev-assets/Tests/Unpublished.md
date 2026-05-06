@@ -1,5 +1,5 @@
 ---
-wiki-publish: false
+hl-publish: false
 ---
 
 This page should not be published.

@@ -11,7 +11,14 @@ import remarkParse from 'remark-parse'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkStringify from 'remark-stringify'
 import { matter } from 'vfile-matter'
-import type { Folder, File, Tree, WikiSettings, Frontmatter, Manifest } from '../src/lib/types.ts'
+import type {
+	Folder,
+	File,
+	Tree,
+	ProjectSettings,
+	Frontmatter,
+	Manifest
+} from '../src/lib/types.ts'
 
 if (!existsSync(assetsDir)) {
 	console.error('Error: No assets directory when making manifest')
@@ -35,22 +42,22 @@ const mediaPaths = entries
 	.map((e) => `${relative(assetsDir, e.parentPath)}${path.sep}${e.name}`)
 
 // Set settings and the navigation tree
-const wikiSettings: WikiSettings = {
-	title: 'Awesome Wiki',
+const projectSettings: ProjectSettings = {
+	title: 'My Heirloom Project',
 	frontPage: { path: '' },
 	allowMermaidInk: false
 }
 
 for (const { file, frontmatter, relPathParent } of fileMetadata) {
-	if (frontmatter['wiki-frontpage'] === true) {
-		// The front page contains the wiki settings
+	if (frontmatter['hl-frontpage'] === true) {
+		// The front page contains the project settings
 		// All settings have defaults so this just updates them if needed
-		if (frontmatter['wiki-project-title']) wikiSettings.title = frontmatter['wiki-project-title']
-		if (frontmatter['wiki-allow-mermaid-ink'])
-			wikiSettings.allowMermaidInk = frontmatter['wiki-allow-mermaid-ink']
+		if (frontmatter['hl-project-title']) projectSettings.title = frontmatter['hl-project-title']
+		if (frontmatter['hl-allow-mermaid-ink'])
+			projectSettings.allowMermaidInk = frontmatter['hl-allow-mermaid-ink']
 
 		// Store the front page separately
-		wikiSettings.frontPage = { path: file.path }
+		projectSettings.frontPage = { path: file.path }
 	} else {
 		// Normal pages are added to the nav tree
 		const parent = folders.get(relPathParent) ?? root
@@ -60,14 +67,14 @@ for (const { file, frontmatter, relPathParent } of fileMetadata) {
 
 sortTree(root.children)
 
-if (wikiSettings.frontPage.path === '') {
-	console.error('Error: No front page is set. Cannot build the wiki without a front page')
+if (projectSettings.frontPage.path === '') {
+	console.error('Error: No front page is set. Cannot build the website without a front page')
 	process.exit(1)
 }
 
 // Aggregate everything and save
 const manifest: Manifest = {
-	wikiSettings,
+	projectSettings,
 	slugsToPaths,
 	pathsToRoutes,
 	mediaPaths,
@@ -173,7 +180,7 @@ function resolveSlugs(items: FileMeta[]): Record<string, string> {
 
 	// Group by slug to notice duplicates
 	const groups = items
-		.filter((item) => item.frontmatter['wiki-frontpage'] !== true)
+		.filter((item) => item.frontmatter['hl-frontpage'] !== true)
 		.reduce((groups, item) => {
 			const slug = slugTransform(item.file.title)
 			if (!groups.has(slug)) groups.set(slug, [])
@@ -190,8 +197,8 @@ function resolveSlugs(items: FileMeta[]): Record<string, string> {
 			for (const item of group) {
 				let disambiguation: string
 
-				if (item.frontmatter['wiki-disambiguation']) {
-					disambiguation = slugTransform(item.frontmatter['wiki-disambiguation'])
+				if (item.frontmatter['hl-disambiguation']) {
+					disambiguation = slugTransform(item.frontmatter['hl-disambiguation'])
 				} else {
 					// Generate disambiguation from file path, e.g. "Docs/Nesting" -> "Docs_Nesting"
 					const parts = item.relPathParent

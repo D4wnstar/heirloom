@@ -3,5 +3,5 @@ import { fetchPage } from '$lib/loading'
 
 export const load = (async ({ parent }) => {
 	const manifest = await parent()
-	return await fetchPage(manifest.wikiSettings.frontPage.path, manifest)
+	return await fetchPage(manifest.projectSettings.frontPage.path, manifest)
 }) satisfies PageServerLoad

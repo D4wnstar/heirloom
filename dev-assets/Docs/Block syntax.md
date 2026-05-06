@@ -1,5 +1,5 @@
 ---
-wiki-publish: true
+hl-publish: true
 ---
 
 This is a test page for each custom block.
