@@ -16,7 +16,8 @@ import { fromHtml } from 'hast-util-from-html'
  */
 const rehypeMermaidInk: Plugin<[], Root> = function () {
 	return async function (tree: Root) {
-		const promises: { promise: Promise<string>; parent: Root | Element; index: number }[] = []
+		const promises: { promise: Promise<string | void>; parent: Root | Element; index: number }[] =
+			[]
 
 		visit(tree, 'element', (node, index, parent) => {
 			if (!index || !parent) return
@@ -36,15 +37,16 @@ const rehypeMermaidInk: Plugin<[], Root> = function () {
 
 				const diagramCode = code.children[0].value
 				const param = encodeURIComponent(Buffer.from(diagramCode).toString('base64'))
-				const promise = fetch(`https://mermaid.ink/svg/${param}?bgColor=!white`).then((r) =>
-					r.text()
-				)
+				const promise = fetch(`https://mermaid.ink/svg/${param}?bgColor=!white`)
+					.then((r) => r.text())
+					.catch((r) => console.error(`Failed to call mermaid.ink. Reason: ${r}`))
 				promises.push({ promise, parent, index })
 			}
 		})
 
 		for (const { promise, parent, index } of promises) {
 			const svg = await promise
+			if (!svg) continue
 			const elem = fromHtml(svg, { fragment: true })
 			parent.children[index] = elem.children[0]
 		}
