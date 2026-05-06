@@ -38,26 +38,32 @@ a[href^="https://"]::after
 	}
 
 	h1 {
+		position: relative;
 		@apply h1;
 	}
 
 	h2 {
+		position: relative;
 		@apply h2;
 	}
 
 	h3 {
+		position: relative;
 		@apply h3;
 	}
 
 	h4 {
+		position: relative;
 		@apply h4;
 	}
 
 	h5 {
+		position: relative;
 		@apply h5;
 	}
 
 	h6 {
+		position: relative;
 		@apply h6;
 	}
 
@@ -67,6 +73,24 @@ a[href^="https://"]::after
 
 	a.broken-link {
 		@apply text-error-800-200;
+	}
+
+	a.permalink {
+		font-weight: lighter;
+		position: absolute;
+		left: calc(-0.5em - 1.5rem);
+		opacity: 0%;
+		transition: opacity 0.2s;
+		@apply text-surface-900-100;
+	}
+
+	h1:hover a.permalink,
+	h2:hover a.permalink,
+	h3:hover a.permalink,
+	h4:hover a.permalink,
+	h5:hover a.permalink,
+	h6:hover a.permalink {
+		opacity: 50%;
 	}
 
 	code {

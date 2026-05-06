@@ -42,6 +42,7 @@ import { ASSETS_FOLDER } from '$lib/loading'
 import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
 import rehypeMermaidInk from './rehype-mermaid-ink'
+import rehypePermalinks from './rehype-permalinks'
 
 declare module 'vfile' {
 	interface DataMap {
@@ -196,6 +197,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	processor
 		.use(rehypePrism, { defaultLanguage: 'markdown' })
 		.use(rehypeExternalLinks)
+		.use(rehypePermalinks)
 		.use(rehypeStringify, { allowDangerousHtml: true })
 
 	// remarkMath has nonstandard syntax for block math, so we fix it here

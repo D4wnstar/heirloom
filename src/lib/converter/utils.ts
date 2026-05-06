@@ -1,4 +1,5 @@
-import type { Parent } from 'mdast'
+import type { Parent as ParentMdast } from 'mdast'
+import type { Parent as ParentHast } from 'hast'
 import type { Code, Construct } from 'micromark-util-types'
 
 /**
@@ -29,13 +30,13 @@ export function makeDoubleCharConstruct(name: string, char1: Code, char2: Code):
 	}
 }
 
-export function dumpLiteralValues(parent: Parent): string {
+export function dumpLiteralValues(parent: ParentMdast | ParentHast): string {
 	let out = ''
 	for (const child of parent.children) {
 		if ('value' in child) {
 			out += child.value
 		} else if ('children' in child) {
-			out += dumpLiteralValues(child as Parent)
+			out += dumpLiteralValues(child as ParentMdast | ParentHast)
 		}
 	}
 	return out
