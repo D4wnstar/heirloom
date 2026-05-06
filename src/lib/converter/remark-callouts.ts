@@ -1,4 +1,5 @@
 import type { BlockContent, PhrasingContent, Root, Text } from 'mdast'
+import type { Plugin } from 'unified'
 import { visit } from 'unist-util-visit'
 
 const calloutOpener = /^\[!(\w+)\](-)?/
@@ -19,27 +20,26 @@ const calloutOpener = /^\[!(\w+)\](-)?/
  * This plugin relies on `remarkGfm`'s detection of `blockquote` nodes.
  * Therefore, this must run *after* `remarkGfm` to work.
  */
-export default function remarkCallouts() {
+const remarkCallouts: Plugin<[], Root> = function () {
+	// remark-gfm makes blockquote nodes that look kind of like this (in HTML):
+	//
+	// <blockquote><p>[!type] Title\nContent here</p></blockquote>
+	//
+	// They must become:
+	//
+	// <aside class="callout" data-callout="type">
+	//   <header class="callout-title">Title</header>
+	//   <div class="callout-content"><p>Content here</p></div>
+	// </aside>
+	//
+	// Most common callout syntax is:
+	// [!type] Title\nContent here
+	//
+	// The variants (can be combined) are:
+	// Collapsible (add - after type): [!type]- Title\nContent here
+	// Auto-title (remove title): [!type]\nContent here
+	// Empty (remove content): [!type] Title
 	return function (tree: Root) {
-		// RemarkGfm makes blockquote nodes that look kind of like this (in HTML):
-		//
-		// <blockquote><p>[!type] Title\nContent here</p></blockquote>
-		//
-		// They must become:
-		//
-		// <aside class="callout" data-callout="type">
-		//   <header class="callout-title">Title</header>
-		//   <div class="callout-content"><p>Content here</p></div>
-		// </aside>
-		//
-		// Most common callout syntax is:
-		// [!type] Title\nContent here
-		//
-		// The variants (can be combined) are:
-		// Collapsible (add - after type): [!type]- Title\nContent here
-		// Auto-title (remove title): [!type]\nContent here
-		// Empty (remove content): [!type] Title
-
 		visit(tree, 'blockquote', (node) => {
 			// Empty blockquotes can't be callouts
 			const firstPara = node.children.at(0)
@@ -47,7 +47,8 @@ export default function remarkCallouts() {
 
 			// Callouts must start with [!type]
 			const firstParaEl = firstPara.children.at(0)
-			if (!firstParaEl || !hasValue(firstParaEl) || !calloutOpener.test(firstParaEl.value)) return
+			if (!firstParaEl || !('value' in firstParaEl) || !calloutOpener.test(firstParaEl.value))
+				return
 
 			const match = firstParaEl.value.match(calloutOpener)!
 			const calloutType = match[1]
@@ -64,7 +65,7 @@ export default function remarkCallouts() {
 			for (const child of firstPara.children) {
 				firstLineEls.push(child)
 
-				if (hasValue(child) && child.value.includes('\n')) {
+				if ('value' in child && child.value.includes('\n')) {
 					isMultiline = true
 					// If there is a newline, everything after is content, not title
 					const content = child.value.split('\n').slice(1).join('\n')
@@ -131,9 +132,4 @@ export default function remarkCallouts() {
 	}
 }
 
-/**
- * Type guard to check if a PhrasingContent node has a 'value' property
- */
-function hasValue(node: PhrasingContent): node is Extract<PhrasingContent, { value: string }> {
-	return Object.hasOwn(node, 'value')
-}
+export default remarkCallouts

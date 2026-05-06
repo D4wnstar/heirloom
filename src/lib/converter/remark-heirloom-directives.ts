@@ -18,11 +18,19 @@ declare module 'mdast' {
 	}
 }
 
+/**
+ * Data about an embedded image to be shown alongside its caption.
+ */
 export interface ImageData {
 	url: string
 	caption: string | null
 }
 
+/**
+ * Heirloom page details. Can be key-value pairs, horizontal rules
+ * or section headers. These are meant to be displayed in a tabular
+ * fashion outside of the main flow of the document.
+ */
 export type Detail =
 	| { type: 'key-value'; key: string; value: string }
 	| { type: 'break' }

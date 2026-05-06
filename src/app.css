@@ -118,10 +118,6 @@ a[href^="https://"]::after
 		@apply list-none;
 	}
 
-	input.task-list-item-checkbox {
-		@apply checkbox mr-2 cursor-default;
-	}
-
 	hr {
 		@apply hr;
 	}
@@ -130,28 +126,8 @@ a[href^="https://"]::after
 		@apply table;
 	}
 
-	div.note-embed {
-		@apply border-l-2 pl-6 border-secondary-300-700;
-	}
-
-	section.secret-block {
-		@apply rounded !bg-opacity-80 px-6 py-4 bg-surface-200-800;
-
-		.secret-block-header {
-			@apply pb-2 font-bold type-scale-3;
-		}
-
-		.secret-block-content {
-			@apply space-y-4;
-		}
-	}
-
 	img {
 		@apply mx-auto;
-	}
-
-	section.footnotes ol {
-		@apply mt-6;
 	}
 
 	/* Callouts */

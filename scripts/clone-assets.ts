@@ -2,28 +2,32 @@ import { execSync } from 'child_process'
 import { cpSync, existsSync, mkdirSync, rmSync } from 'fs'
 import { assetsDir, devAssetsDir } from './utils.ts'
 
-const sourceRepoUrl = process.env.SOURCE_REPO_URL
-
-if (process.env.VERCEL === '1' && existsSync(assetsDir)) {
-	// On Vercel, assets are cached across builds, so make sure to delete old ones
-	console.log('Removing assets cached by Vercel')
-	rmSync(assetsDir, { recursive: true, force: true })
-}
+const sourceRepoUrl = process.env.HEIRLOOM_SOURCE_REPO_URL
 
 if (sourceRepoUrl) {
+	// Remote assets are available
+	// Make sure to handle existing assets from a previous run, if any
 	if (existsSync(assetsDir)) {
-		// During local dev, skip if the repo has already been cloned
-		console.log('assets folder already exists, reutilizing existing assets')
-		process.exit(0)
+		if (process.env.HEIRLOOM_USE_CACHED_ASSETS) {
+			console.log('Reusing cached assets')
+			process.exit(0)
+		}
+
+		try {
+			console.log('Removing old assets')
+			rmSync(assetsDir, { recursive: true, force: true })
+		} catch (error) {
+			console.error(`Error removing assets from previous run: ${error}`)
+			process.exit(1)
+		}
 	}
 
-	// If there's a URL to source from, use it
 	console.log(`Cloning repository: ${sourceRepoUrl}`)
-	console.log(`Destination:        ${assetsDir}`)
+	console.log(`To destination:     ${assetsDir}`)
 
-	mkdirSync(assetsDir, { recursive: true })
 	try {
-		execSync(`git clone --depth 1 ${sourceRepoUrl} ${assetsDir}`, { stdio: 'inherit' })
+		mkdirSync(assetsDir, { recursive: true })
+		execSync(`git clone --depth 1 "${sourceRepoUrl}" "${assetsDir}"`, { stdio: 'inherit' })
 		rmSync(`${assetsDir}/.git`, { recursive: true, force: true })
 		console.log('Repository cloned successfully')
 	} catch (error) {
@@ -31,10 +35,10 @@ if (sourceRepoUrl) {
 		process.exit(1)
 	}
 } else if (existsSync(devAssetsDir)) {
-	// If not, fall back to dev assets
-	console.log(`No SOURCE_REPO_URL set: using development assets`)
-	console.log(`Source:      ${devAssetsDir}`)
-	console.log(`Destination: ${assetsDir}`)
+	// Use dev assets instead
+	console.log(`No HEIRLOOM_SOURCE_REPO_URL set: using development assets`)
+	console.log(`Copying source: ${devAssetsDir}`)
+	console.log(`To destination: ${assetsDir}`)
 
 	try {
 		if (existsSync(assetsDir)) {
@@ -50,7 +54,7 @@ if (sourceRepoUrl) {
 	}
 } else {
 	console.error(
-		`Error: SOURCE_REPO_URL environment variable is not set and no dev assets are available at ${devAssetsDir}`
+		`Error: HEIRLOOM_SOURCE_REPO_URL environment variable is not set and no dev assets are available at ${devAssetsDir}`
 	)
 	process.exit(1)
 }

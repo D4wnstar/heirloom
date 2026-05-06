@@ -4,13 +4,13 @@ import { visit } from 'unist-util-visit'
 import { fromHtml } from 'hast-util-from-html'
 
 /**
- * Rehype plugin to render MermaidJS diagrams with [Mermaid Ink](https://mermaid.ink/).
+ * Rehype plugin to render MermaidJS diagrams with [mermaid.ink](https://mermaid.ink/).
  * Mermaid does not have a server-side rendering (and thus static generation) solution
  * since their renderer relies on the browser API. This can't even be solved by using
  * a virtual DOM like JSDOM or LinkeDOM, so the workaround would be to use Playwright
  * to drive an entire headless browser on the server at build time. However, that's
  * way too resource-intensive and complicated to justify doing for Heirloom, so as an
- * alternative, this plugin provides remote rendering through Mermaid Ink.
+ * alternative, this plugin provides remote rendering through mermaid.ink.
  *
  * Since this relies on an external service, it is optional and disabled by default.
  */

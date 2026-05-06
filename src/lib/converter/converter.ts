@@ -5,13 +5,12 @@
  * - GitHub-flavored markdown
  * - Obsidian-flavored markdown, including
  *   - Callouts, normal and foldable
- *   - Footnotes
  *   - Wikilinks
  *   - Embeds, both text and media
  * - YAML frontmatter
  * - Math code (rendered with KaTeX)
- * - Mermaid code
- * - Custom Block syntax
+ * - Mermaid code (currently only through mermaid.ink)
+ * - Custom Heirloom directives
  */
 
 import { unified } from 'unified'
@@ -50,33 +49,55 @@ declare module 'vfile' {
 	}
 }
 
+/**
+ * Text transformations for the input markdown.
+ * @returns The transformed markdown.
+ */
 function preprocessMarkdown(md: string) {
+	// remark-math has nonstandard syntax for block math, so we fix it here
 	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
 }
 
+/**
+ * Finds the path associated with the target string by finding the first matching
+ * last path segment (case insensitive). If the target is already a path, returns
+ * itself instead.
+ * @param target The target string, likely from a wikilink or embed.
+ * @param paths The set of paths to search from.
+ * @returns The matched path, if any.
+ */
+function findPath(target: string, paths: string[]) {
+	// If target is a path, no need to do anything
+	// TODO: Check if / is always the correct path separator (it probably isn't!)
+	if (target.includes('/')) return target
+
+	// If it's a name (stem, without ext), we can't be sure if it's unique or not
+	// In this case, we get the first path whose name is equal to the
+	// given name. This check also needs to be case-insensitive
+	const path = paths.find((path) => {
+		const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
+		return fileStem?.toLowerCase() === target.toLowerCase()
+	})
+	return path
+}
+
+/**
+ * Converts a markdown string into an HTML one following global manifest settings.
+ * This function is the core of Heirloom. This is where written markdown gets turned
+ * into the form that is shown on the website.
+ * @param markdown A markdown string.
+ * @param manifest The Heirloom build manifest created during preprocessing.
+ * @returns The HTML string alongside additional content about the page.
+ */
 export async function markdownToHtml(markdown: string, manifest: Manifest) {
-	const getPath = (target: string, paths: string[]) => {
-		// The target can be a file name or a file path
-		// TODO: Check that / is always the correct path separator
-		if (target.includes('/')) return target
-
-		// If it's a name (stem, without ext), we can't be sure if it's unique or not
-		// In this case, we get the first path whose name is equal to the
-		// given name. This check also needs to be case-insensitive
-		const path = paths.find((path) => {
-			const fileStem = path.split('/').at(-1)?.replace(/\.md$/, '')
-			return fileStem?.toLowerCase() === target.toLowerCase()
-		})
-		return path
-	}
-
+	// Href resolver for remark-wikilinks
 	const hrefResolver: HrefResolver = (target, section) => {
 		const pathsToRoutes = manifest.pathsToRoutes
 		if (target && section) {
-			const path = getPath(target, Object.keys(pathsToRoutes))
+			const path = findPath(target, Object.keys(pathsToRoutes))
 			return path ? `${pathsToRoutes[path]}#${section}` : null
 		} else if (target && !section) {
-			const path = getPath(target, Object.keys(pathsToRoutes))
+			const path = findPath(target, Object.keys(pathsToRoutes))
 			return path ? pathsToRoutes[path] : null
 		} else if (!target && section) {
 			// This is an internal #Section link
@@ -89,8 +110,9 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		}
 	}
 
+	// Image embed resolver for remark-wikilinks and remark-heirloom-directives
 	const imageEmbedResolver: ImageEmbedResolver = (target, extension) => {
-		const path = getPath(target, manifest.mediaPaths)
+		const path = findPath(target, manifest.mediaPaths)
 		if (!path) return null // TODO: Make a broken embed placeholder
 		const filepath = join(ASSETS_FOLDER, path)
 		const base64 = readFileSync(filepath, 'base64')
@@ -100,8 +122,9 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	// Prevent infinite recursion by disallowing embedding a page within itself
 	const embedsInProgress = new Set<string>()
 
+	// Page embed resolver for remark-wikilinks
 	const pageEmbedResolver: PageEmbedResolver = (processor, target, section) => {
-		const path = getPath(target, Object.keys(manifest.pathsToRoutes))
+		const path = findPath(target, Object.keys(manifest.pathsToRoutes))
 		if (!path || embedsInProgress.has(target)) return [] // TODO: Make a broken embed placeholder
 
 		embedsInProgress.add(target)
@@ -157,6 +180,12 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(rehypeExternalLinks)
 		.use(rehypeStringify, { allowDangerousHtml: true })
 
+	/**
+	 * Processor used to handle partial processing of an embedded page
+	 * by remark-wikilinks. This processor only does markdown parsing and
+	 * transformation without HTML conversion/stringification, as the
+	 * transformed AST is embedded directly into the parent page's AST.
+	 */
 	const pageEmbedProcessor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
@@ -170,6 +199,9 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkDirective)
 		.use(remarkHeirloomDirectives, { inlineTextProcessor, imageEmbedResolver })
 
+	/**
+	 * The main Heirloom markdown processor. This handles everything about conversion.
+	 */
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
@@ -200,19 +232,16 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(rehypePermalinks)
 		.use(rehypeStringify, { allowDangerousHtml: true })
 
-	// remarkMath has nonstandard syntax for block math, so we fix it here
 	markdown = preprocessMarkdown(markdown)
-
 	const vfile = await processor.process(markdown)
-	const frontmatter = vfile.data.frontmatter
+
 	const sidebarImages = vfile.data.sidebarImages ?? []
 	const details = vfile.data.details ?? []
-	const title = undefined // TODO: Add a frontmatter property later
+	const title = undefined // TODO: Hook up hl-title frontmatter property
 
 	return {
 		html: String(vfile),
 		title,
-		frontmatter,
 		sidebarImages,
 		details
 	}

@@ -2,6 +2,7 @@ import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types
 import { codes } from 'micromark-util-symbol'
 import { makeDoubleCharConstruct } from './utils'
 import type { Root } from 'mdast'
+import type { Plugin } from 'unified'
 
 declare module 'micromark-util-types' {
 	interface TokenTypeMap {
@@ -85,18 +86,18 @@ const doublePercentConstruct = makeDoubleCharConstruct(
 
 const commentConstruct: Construct = { name: 'comment', tokenize: commentTokenize }
 export const comments: Extension = { text: { [codes.percentSign]: commentConstruct } }
-// Comments don't have a fromMarkdown extension because they only need to vanish
+// Comments don't have a fromMarkdown extension because they're supposed to vanish
 
 /**
  * Remark extension to support markdown `%%comments%%`. This will remove all text
  * wrapped in double `%` characters.
  */
-export default function remarkComments() {
-	//@ts-expect-error TS doesn't understand `this`
-	const self = this as Processor<Root>
-	const data = self.data()
+const remarkComments: Plugin<[], Root> = function () {
+	const data = this.data()
 
 	// Register extension
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
 	micromarkExts.push(comments)
 }
+
+export default remarkComments

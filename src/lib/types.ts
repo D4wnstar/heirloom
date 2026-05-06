@@ -1,21 +1,3 @@
-export interface DetailsData {
-	key: string
-	value: string
-}
-
-export interface SidebarImageData {
-	path: string
-	caption: string
-}
-
-export type ProjectSettings = {
-	title: string
-	frontPage: {
-		path: string
-	}
-	allowMermaidInk: boolean
-}
-
 /**
  * Markdown frontmatter properties explicitly handled by Heirloom.
  */
@@ -29,6 +11,7 @@ export type Frontmatter = {
 	aliases?: string[]
 
 	/* CUSTOM HEIRLOOM PROPERTIES */
+	/* All Heirloom properties should start with 'hl-' */
 	/**
 	 * Determines whether the file should be published or not.
 	 * Any file with `hl-publish` set to false will be ignored and
@@ -36,6 +19,12 @@ export type Frontmatter = {
 	 * @default false
 	 */
 	'hl-publish'?: boolean
+	/**
+	 * Alternate title for the page that will be displayed on the website.
+	 * Useful when the file name needs to differ from the published title.
+	 * @default undefined
+	 */
+	'hl-title'?: string
 	/**
 	 * A string that will be used for disambiguation in case of page title conflicts.
 	 * It will appear in parentheses after the page title. If this is unset and there
@@ -76,6 +65,61 @@ export type Frontmatter = {
 	'hl-allow-mermaid-ink'?: boolean
 } & Record<string, unknown>
 
+/**
+ * Settings about the project and website as a whole.
+ */
+export type ProjectSettings = {
+	/**
+	 * The display title of the project.
+	 */
+	title: string
+	/**
+	 * Information about the front page of the website.
+	 */
+	frontPage: {
+		/**
+		 * The file path to the front page's markdown file.
+		 */
+		path: string
+	}
+	/**
+	 * Whether [mermaid.ink](https://mermaid.ink) is allowed or not.
+	 * See the `hl-allow-mermaid-ink` frontmatter property for more.
+	 */
+	allowMermaidInk: boolean
+}
+
+/**
+ * The Heirloom build manifest generated during asset preprocessing.
+ * Contains information needed by the website during static generation.
+ */
+export interface Manifest {
+	/**
+	 * The project settings.
+	 */
+	projectSettings: ProjectSettings
+	/**
+	 * The data structure used to render the navigation menu made
+	 * to explore the website.
+	 */
+	navTree: Tree
+	/**
+	 * A map between page slugs and their associated markdown file path on disk.
+	 * These are used to identify which file to fetch when loading a page.
+	 */
+	slugsToPaths: Record<string, string>
+	/**
+	 * A map between markdown file paths on disk and their associated website route.
+	 * These are used to resolve wikilinks to asset files to actual HTML anchors.
+	 */
+	pathsToRoutes: Record<string, string>
+	/**
+	 * A list of all media file paths. These are used to resolve media file paths
+	 * (such as in embeds) to their content.
+	 */
+	mediaPaths: string[]
+}
+
 export interface Folder {
 	type: 'folder'
 	title: string
@@ -93,11 +137,3 @@ export interface File {
 }
 
 export type Tree = (File | Folder)[]
-
-export interface Manifest {
-	projectSettings: ProjectSettings
-	navTree: Tree
-	slugsToPaths: Record<string, string>
-	pathsToRoutes: Record<string, string>
-	mediaPaths: string[]
-}

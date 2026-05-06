@@ -30,6 +30,12 @@ export function makeDoubleCharConstruct(name: string, char1: Code, char2: Code):
 	}
 }
 
+/**
+ * Recursively dumps all the text values of the input node and all its
+ * children into a string.
+ * @param parent An mdast or hast node with children.
+ * @returns The string of all concatenated values.
+ */
 export function dumpLiteralValues(parent: ParentMdast | ParentHast): string {
 	let out = ''
 	for (const child of parent.children) {

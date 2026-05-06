@@ -1,4 +1,4 @@
-import type { Parent, PhrasingContent } from 'mdast'
+import type { Parent, PhrasingContent, Root } from 'mdast'
 import {
 	markdownLineEnding,
 	markdownLineEndingOrSpace,
@@ -9,6 +9,7 @@ import type { Code, Construct, Extension } from 'micromark-util-types'
 import type { Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
 import type { Extension as FromMarkdownExtension, Handle } from 'mdast-util-from-markdown'
+import type { Plugin } from 'unified'
 
 declare module 'micromark-util-types' {
 	interface TokenTypeMap {
@@ -171,10 +172,8 @@ const highlightsFromMarkdown: FromMarkdownExtension = {
  * Remark plugin to support markdown `==highlights==`. This will create an HTML
  * `<mark>` element for all text wrapped in double `=` characters.
  */
-export default function remarkHighlights() {
-	//@ts-expect-error TS doesn't understand `this`
-	const self = this as Processor<Root>
-	const data = self.data()
+const remarkHighlights: Plugin<[], Root> = function () {
+	const data = this.data()
 
 	// Register extensions
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
@@ -182,3 +181,5 @@ export default function remarkHighlights() {
 	micromarkExts.push(highlights)
 	fromMarkdownExts.push(highlightsFromMarkdown)
 }
+
+export default remarkHighlights

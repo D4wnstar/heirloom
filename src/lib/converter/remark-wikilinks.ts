@@ -5,7 +5,7 @@ import { makeDoubleCharConstruct } from './utils'
 import type { Blockquote, Image, Link, Literal, Parent, Root, RootContent } from 'mdast'
 import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
 import { visit } from 'unist-util-visit'
-import type { Processor } from 'unified'
+import type { Plugin, Processor } from 'unified'
 
 // A wikilink has the following general syntax:
 //
@@ -378,6 +378,7 @@ export interface WikilinkOptions {
 	 * The processor passed to `pageEmbedResolver`. You probably want to use this
 	 * to `parse` and `run` (but not `stringify`) the target page, then return the
 	 * appropriate nodes. Be sure to not use `remark-rehype` as you want MDAST nodes.
+	 * If unset, the parent processor will pass itself.
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	pageEmbedProcessor?: Processor<any, any, any, any, any>
@@ -413,16 +414,14 @@ const defaultImageEmbedResolver: ImageEmbedResolver = () => null
 /**
  * Remark plugin to support markdown `[[wikilinks]]`.
  */
-export default function remarkWikilinks(options: WikilinkOptions = {}) {
-	//@ts-expect-error TS doesn't understand `this`
-	const self = this as Processor
-	const data = self.data()
+const remarkWikilinks: Plugin<[WikilinkOptions?], Root> = function (options = {}) {
+	const data = this.data()
 
 	const hrefResolver = options.hrefResolver ?? defaultHrefResolver
 	const linkTextResolver = options.linkTextResolver ?? defaultLinkTextResolver
 	const pageEmbedResolver = options.pageEmbedResolver ?? defaultPageEmbedResolver
 	const imageEmbedResolver = options.imageEmbedResolver ?? defaultImageEmbedResolver
-	const pageEmbedProcessor = options.pageEmbedProcessor ?? self
+	const pageEmbedProcessor = options.pageEmbedProcessor ?? this
 
 	// Register extensions
 	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
@@ -512,3 +511,5 @@ export default function remarkWikilinks(options: WikilinkOptions = {}) {
 		})
 	}
 }
+
+export default remarkWikilinks

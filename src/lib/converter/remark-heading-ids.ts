@@ -1,15 +1,16 @@
 import type { Root } from 'mdast'
 import { visit } from 'unist-util-visit'
 import { dumpLiteralValues } from './utils'
+import type { Plugin } from 'unified'
 
-// remark-wikilinks #Section links need to abide by whatever id
+// NOTE: remark-wikilinks #Section links need to abide by whatever id
 // formatting we decide here
 
 /**
  * Remark plugin to add ids to HTML headings based on their original
  * markdown content.
  */
-export default function remarkHeadingIds() {
+const remarkHeadingIds: Plugin<[], Root> = function () {
 	return function (tree: Root) {
 		visit(tree, 'heading', (node) => {
 			const value = dumpLiteralValues(node)
@@ -23,3 +24,5 @@ export default function remarkHeadingIds() {
 		})
 	}
 }
+
+export default remarkHeadingIds
