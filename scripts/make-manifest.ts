@@ -35,7 +35,7 @@ const fileMetadata = collectFileMetadata(entries, assetsDir)
 // and paths to routes for wikilink generation
 const slugsToPaths = resolveSlugs(fileMetadata)
 const pathsToRoutes = Object.fromEntries(
-	Object.entries(slugsToPaths).map(([slug, path]) => [path, '/wiki/' + slug])
+	Object.entries(slugsToPaths).map(([slug, path]) => [path, '/pages/' + slug])
 )
 const mediaPaths = entries
 	.filter((e) => e.isFile() && !e.name.endsWith('.md'))
@@ -242,7 +242,7 @@ function resolveSlugs(items: FileMeta[]): Record<string, string> {
  * Run string transformations to meet slug formatting.
  */
 function slugTransform(title: string) {
-	return title.replaceAll(/\s/g, '_')
+	return encodeURIComponent(title.replaceAll(/\s/g, '_'))
 }
 
 /**

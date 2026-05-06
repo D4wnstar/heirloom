@@ -109,7 +109,7 @@
 			{#each autocompleteLinks as link}
 				<a
 					class="btn block w-full text-left hover:bg-surface-200-800"
-					href={`/wiki/${link.slug}`}
+					href={`/pages/${link.slug}`}
 					onclick={() => (searchQuery = '')}>{link.title}</a
 				>
 			{/each}
