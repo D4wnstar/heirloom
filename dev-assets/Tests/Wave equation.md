@@ -1,3 +1,7 @@
+---
+hl-publish: true
+---
+
 The **wave equation** is a second-order linear [[partial differential equation]] in space and time that describes linear [[Dispersion|nondispersive]] [[wave]] phenomena. In one spatial dimension $x$, it reads
 $$\frac{ \partial ^{2} \psi(x,t) }{ \partial x^{2} }=\frac{1}{v^{2}}\frac{ \partial ^{2}\psi (x,t) }{ \partial t^{2} } \tag{1}$$
 $\psi(x,t)$ is the [[scalar field]] solution to the equation and it is called the **wavefunction**, whereas the parameter $v$ is interpreted in physics as the **speed of the wave** (although the concept of wave speed is more complicated; here $v$ is both the [[phase velocity]] and the [[group velocity]]). The value of $\psi$ for any $x$ and $t$ is called the **[[amplitude]]** of the wave in that place and time[^1]. In multiple spatial dimensions $\mathbf{r}$, the equation generalizes using the [[Laplacian]]:

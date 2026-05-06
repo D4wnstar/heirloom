@@ -29,7 +29,8 @@ if (!existsSync(assetsDir)) {
 const { root, folders, entries } = collectFileTree(assetsDir)
 
 // Read all files to get their frontmatter, plus other metadata
-const fileMetadata = collectFileMetadata(entries, assetsDir)
+// Returns file metadata and set of folder paths containing published files
+const { fileMetadata, publishedFolderPaths } = collectFileMetadata(entries, assetsDir)
 
 // Map slugs to paths for page generation
 // and paths to routes for wikilink generation
@@ -66,6 +67,8 @@ for (const { file, frontmatter, relPathParent } of fileMetadata) {
 }
 
 sortTree(root.children)
+
+pruneEmptyFolders(root, publishedFolderPaths)
 
 if (projectSettings.frontPage.path === '') {
 	console.error('Error: No front page is set. Cannot build the website without a front page')
@@ -127,7 +130,9 @@ function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
 		.use(() => (_, file) => matter(file))
 		.use(remarkStringify)
 
-	const workingFiles: FileMeta[] = []
+	const fileMetadata: FileMeta[] = []
+	const publishedFolderPaths = new Set<string>()
+
 	for (const entry of entries) {
 		// Skip hidden files and folders and anything that's not a markdown file
 		if (
@@ -147,6 +152,9 @@ function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
 		const vfile = processor.processSync(content)
 		const frontmatter = vfile.data.matter as Frontmatter
 
+		// Skip unpublished files
+		if (frontmatter['hl-publish'] !== true) continue
+
 		const file: File = {
 			type: 'file',
 			title: entry.name.replace(/\.md$/, ''),
@@ -155,9 +163,15 @@ function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
 			aliases: frontmatter.aliases ?? []
 		}
 
-		workingFiles.push({ file, frontmatter, relPathParent })
+		fileMetadata.push({ file, frontmatter, relPathParent })
+
+		// Track folder as having published content
+		publishedFolderPaths.add(relPathParent)
+		for (const part of relPathParent.split(path.sep)) {
+			if (part.length > 0) publishedFolderPaths.add(part)
+		}
 	}
-	return workingFiles
+	return { fileMetadata, publishedFolderPaths }
 }
 
 /**
@@ -255,6 +269,23 @@ function sortTree(tree: Tree) {
 	})
 	for (const item of tree) {
 		if (item.type === 'folder') sortTree(item.children)
+	}
+}
+
+/**
+ * Remove folders from the tree that don't contain any published content.
+ * A folder has published content if it directly contains a published file
+ * (tracked in publishedFolderPaths) or contains a subfolder with published content.
+ */
+function pruneEmptyFolders(folder: Folder, publishedFolderPaths: Set<string>) {
+	for (let i = folder.children.length - 1; i >= 0; i--) {
+		const child = folder.children[i]
+		if (child.type === 'folder') {
+			pruneEmptyFolders(child, publishedFolderPaths)
+			if (child.children.length === 0 && !publishedFolderPaths.has(child.path)) {
+				folder.children.splice(i, 1)
+			}
+		}
 	}
 }
 
