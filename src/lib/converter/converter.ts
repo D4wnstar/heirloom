@@ -24,7 +24,8 @@ import remarkCallouts from './remark-callouts'
 import remarkWikilinks, {
 	type HrefResolver,
 	type ImageEmbedResolver,
-	type PageEmbedResolver
+	type PageEmbedResolver,
+	type SvgEmbedResolver
 } from './remark-wikilinks'
 import remarkHeadingIds from './remark-heading-ids'
 import remarkFrontmatter from 'remark-frontmatter'
@@ -137,6 +138,13 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		return `data:image/${extension};base64,${base64}`
 	}
 
+	const svgEmbedResolver: SvgEmbedResolver = (target) => {
+		const path = findPath(target, manifest.mediaPaths)
+		if (!path) return null
+		const filepath = join(ASSETS_FOLDER, path)
+		return readFileSync(filepath, 'utf-8')
+	}
+
 	// Prevent infinite recursion by disallowing embedding a page within itself
 	const embedsInProgress = new Set<string>()
 
@@ -211,7 +219,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 		.use(remarkHighlights)
 		.use(remarkComments)
 		.use(remarkCallouts)
-		.use(remarkWikilinks, { hrefResolver, pageEmbedResolver, imageEmbedResolver })
+		.use(remarkWikilinks, { hrefResolver, pageEmbedResolver, imageEmbedResolver, svgEmbedResolver })
 		.use(remarkHeadingIds)
 		.use(remarkMath)
 		.use(remarkDirective)
@@ -232,6 +240,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 			hrefResolver,
 			pageEmbedResolver,
 			imageEmbedResolver,
+			svgEmbedResolver,
 			pageEmbedProcessor
 		})
 		.use(remarkHeadingIds)

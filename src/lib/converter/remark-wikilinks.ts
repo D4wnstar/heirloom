@@ -2,10 +2,13 @@ import { markdownLineEnding, markdownSpace } from 'micromark-util-character'
 import { codes } from 'micromark-util-symbol'
 import type { Code, Construct, Extension, Tokenizer } from 'micromark-util-types'
 import { makeDoubleCharConstruct } from './utils'
-import type { Blockquote, Image, Link, Literal, Parent, Root, RootContent } from 'mdast'
+import type { Blockquote, Html, Image, Link, Literal, Parent, Root, RootContent } from 'mdast'
 import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown'
 import { visit } from 'unist-util-visit'
 import type { Plugin, Processor } from 'unified'
+import { fromHtml } from 'hast-util-from-html'
+import type { Element } from 'hast'
+import { toHtml } from 'hast-util-to-html'
 
 // A wikilink has the following general syntax:
 //
@@ -339,6 +342,7 @@ export type PageEmbedResolver = (
 ) => RootContent[]
 
 export type ImageEmbedResolver = (target: string, extension: string) => string | null
+export type SvgEmbedResolver = (target: string) => string | null
 
 export interface WikilinkOptions {
 	/**
@@ -374,6 +378,7 @@ export interface WikilinkOptions {
 	 * The default implementation returns null (and therefore removes embeds).
 	 */
 	imageEmbedResolver?: ImageEmbedResolver
+	svgEmbedResolver?: SvgEmbedResolver
 	/**
 	 * The processor passed to `pageEmbedResolver`. You probably want to use this
 	 * to `parse` and `run` (but not `stringify`) the target page, then return the
@@ -408,8 +413,8 @@ const defaultLinkTextResolver: LinkTextResolver = (target, section, alias) => {
 }
 
 const defaultPageEmbedResolver: PageEmbedResolver = () => []
-
 const defaultImageEmbedResolver: ImageEmbedResolver = () => null
+const defaultSvgEmbedResolver: SvgEmbedResolver = () => null
 
 /**
  * Remark plugin to support markdown `[[wikilinks]]`.
@@ -421,6 +426,7 @@ const remarkWikilinks: Plugin<[WikilinkOptions?], Root> = function (options = {}
 	const linkTextResolver = options.linkTextResolver ?? defaultLinkTextResolver
 	const pageEmbedResolver = options.pageEmbedResolver ?? defaultPageEmbedResolver
 	const imageEmbedResolver = options.imageEmbedResolver ?? defaultImageEmbedResolver
+	const svgEmbedResolver = options.svgEmbedResolver ?? defaultSvgEmbedResolver
 	const pageEmbedProcessor = options.pageEmbedProcessor ?? this
 
 	// Register extensions
@@ -474,6 +480,23 @@ const remarkWikilinks: Plugin<[WikilinkOptions?], Root> = function (options = {}
 					if (!url) return
 					const image: Image = { type: 'image', url }
 					parent.children[index] = image
+				} else if (ext === 'svg') {
+					const svg = svgEmbedResolver(target)
+					if (!svg) return
+
+					// Override the SVG's dimensions to fit the document
+					const elem = fromHtml(svg, { fragment: true })
+					const svgNode = elem.children[0] as Element
+					svgNode.properties.style = 'width: 100%; max-width: 100%; height: auto;'
+					const newSvg = toHtml(svgNode)
+
+					// Pass it as raw HTML
+					const html: Html = {
+						type: 'html',
+						value: newSvg,
+						data: { hName: 'div' }
+					}
+					parent.children[index] = html
 				} else {
 					return // TODO: Support other file types
 				}

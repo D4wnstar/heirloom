@@ -34,8 +34,6 @@ It's easier to see an example.
 > 1. On the left, we see the transformation as moving the point from the blue point to the red point.
 > 2. On the right, we see the transformation rotating the axes themselves from blue to red. Note how the rotation goes in the *opposite* direction here.
 
-![[Plot Rotation coordinate change interpretations.svg]]
-
 In this sense, we can interpret canonical transformations in one of two ways:
 1. *Actively*, as moving the points from an old location to a new location.
 2. *Passively*, as letting the points stay where they are and moving the axes instead, in the opposite direction of the points.
