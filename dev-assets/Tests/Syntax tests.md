@@ -171,6 +171,16 @@ $$\mathbf{F}=-k\mathbf{x}$$
 with $k$ being a positive constant called the **spring constant**. In the small angle approximation, it solves analytically to
 $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\omega t+\varphi)}$$
 
+> Math in a blockquote<br>
+> This is an equation:
+> $$\mathbf{y}=m\mathbf{x}+\mathbf{q}$$
+> It's a linear relation.
+
+> [!info] Math in a callout
+> This is an equation:
+> $$\mathbf{y}=m\mathbf{x}+\mathbf{q}$$
+> It's a linear relation.
+
 # Links
 ## Regular
 - [[Wave equation]] (regular)

@@ -55,7 +55,25 @@ declare module 'vfile' {
  */
 function preprocessMarkdown(md: string) {
 	// remark-math has nonstandard syntax for block math, so we fix it here
-	return md.replaceAll(/^\$\$/gm, '$$$$\n').replaceAll(/\$\$$/gm, '\n$$$$')
+	// It wants double newlines both at the start and end of display block so
+	//
+	// Text
+	// $$equation$$
+	// Text
+	//
+	// must become
+	//
+	// Text
+	// $$
+	// equation
+	// $$
+	// Text
+
+	// TODO: We should probably fork remark-math to support $$display$$ instead
+	const newMd = md
+		.replaceAll(/^\$\$(.*?)\$\$$/gms, '$$$$\n$1\n$$$$') // Normal display
+		.replaceAll(/^> \$\$(.*?)\$\$$/gms, '> $$$$\n> $1\n> $$$$') // Display in blockquotes
+	return newMd
 }
 
 /**
