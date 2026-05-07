@@ -461,7 +461,7 @@ const remarkWikilinks: Plugin<[WikilinkOptions?], Root> = function (options = {}
 
 			// Check if it's a media embed by seeing if there is a file extension
 			const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
-			const extMatch = target.match(/\.(.*)/)
+			const extMatch = target.match(/\.([^.]*?)$/)
 			if (!extMatch || extMatch[1].toLowerCase() === 'md') {
 				// A text embed is just a blockquote containing the embedded page
 				const embedNodes = pageEmbedResolver(pageEmbedProcessor, target, section)
@@ -487,6 +487,12 @@ const remarkWikilinks: Plugin<[WikilinkOptions?], Root> = function (options = {}
 					// Override the SVG's dimensions to fit the document
 					const elem = fromHtml(svg, { fragment: true })
 					const svgNode = elem.children[0] as Element
+					const style = 'width: 100%; max-width: 100%; height: auto;'
+					if (!svgNode.properties) {
+						svgNode.properties = { style }
+					} else {
+						svgNode.properties.style = style
+					}
 					svgNode.properties.style = 'width: 100%; max-width: 100%; height: auto;'
 					const newSvg = toHtml(svgNode)
 
