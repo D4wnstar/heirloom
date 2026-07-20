@@ -252,7 +252,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	if (manifest.projectSettings.allowMermaidInk) processor.use(rehypeMermaidInk)
 
 	processor
-		.use(rehypePrism, { defaultLanguage: 'markdown' })
+		.use(rehypePrism, { defaultLanguage: 'markdown', ignoreMissing: true })
 		.use(rehypeExternalLinks)
 		.use(rehypePermalinks)
 		.use(rehypeStringify, { allowDangerousHtml: true })
