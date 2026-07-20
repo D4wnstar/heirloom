@@ -39,9 +39,9 @@ import rehypeMermaidInk from './rehype-mermaid-ink'
 import rehypePermalinks from './rehype-permalinks'
 import { matter } from 'vfile-matter'
 import type { Frontmatter, Manifest } from '$lib/types'
-import { join } from 'path'
+import { dirname, join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
-import { readFileSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import type { Root } from 'mdast'
 
 declare module 'vfile' {
@@ -133,16 +133,14 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 	const imageEmbedResolver: ImageEmbedResolver = (target, extension) => {
 		const path = findPath(target, manifest.mediaPaths)
 		if (!path) return null // TODO: Make a broken embed placeholder
-		const filepath = join(ASSETS_FOLDER, path)
-		const base64 = readFileSync(filepath, 'base64')
-		return `data:image/${extension};base64,${base64}`
+		return `/media/${path}`
 	}
 
 	const svgEmbedResolver: SvgEmbedResolver = (target) => {
 		const path = findPath(target, manifest.mediaPaths)
 		if (!path) return null
-		const filepath = join(ASSETS_FOLDER, path)
-		return readFileSync(filepath, 'utf-8')
+		const media = join('static', 'media', path)
+		return readFileSync(media, 'utf-8') // Inline the SVG
 	}
 
 	// Prevent infinite recursion by disallowing embedding a page within itself

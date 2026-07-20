@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
-		"preprocess": "svelte-kit sync && ts-node scripts/clone-assets.ts && ts-node scripts/make-manifest.ts",
+		"preprocess": "svelte-kit sync && ts-node scripts/clone-assets.ts && ts-node scripts/make-manifest.ts && ts-node scripts/move-media.ts",
 		"preprocess:cached": "HEIRLOOM_USE_CACHED_ASSETS=1 npm run preprocess",
 		"build": "npm run preprocess && vite build",
 		"build:cached": "HEIRLOOM_USE_CACHED_ASSETS=1 npm run build",
