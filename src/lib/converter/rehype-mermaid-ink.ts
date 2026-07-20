@@ -4,6 +4,38 @@ import { visit } from 'unist-util-visit'
 import { fromHtml } from 'hast-util-from-html'
 
 /**
+ * Fetches with exponential backoff retry logic
+ */
+async function fetchWithRetry(
+	url: string,
+	options: RequestInit = {},
+	maxRetries = 3,
+	baseDelay = 1000
+): Promise<Response> {
+	let lastError: Error | undefined
+
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		try {
+			const response = await fetch(url, options)
+			// Retry on server errors (5xx) and network errors
+			if (response.ok && response.status < 500) {
+				return response
+			}
+			lastError = new Error(`Server error: ${response.status} ${response.statusText}`)
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error(String(error))
+		}
+
+		if (attempt < maxRetries) {
+			const delay = baseDelay * Math.pow(2, attempt)
+			await new Promise((resolve) => setTimeout(resolve, delay))
+		}
+	}
+
+	throw lastError ?? new Error('Failed to fetch after retries')
+}
+
+/**
  * Rehype plugin to render MermaidJS diagrams with [mermaid.ink](https://mermaid.ink/).
  * Mermaid does not have a server-side rendering (and thus static generation) solution
  * since their renderer relies on the browser API. This can't even be solved by using
@@ -37,9 +69,9 @@ const rehypeMermaidInk: Plugin<[], Root> = function () {
 
 				const diagramCode = code.children[0].value
 				const param = encodeURIComponent(Buffer.from(diagramCode).toString('base64'))
-				const promise = fetch(`https://mermaid.ink/svg/${param}?bgColor=!white`)
+				const promise = fetchWithRetry(`https://mermaid.ink/svg/${param}?bgColor=!white`)
 					.then((r) => r.text())
-					.catch((r) => console.error(`Failed to call mermaid.ink. Reason: ${r}`))
+					.catch((r) => console.error(`Failed to call mermaid.ink after retries. Reason: ${r}`))
 				promises.push({ promise, parent, index })
 			}
 		})
