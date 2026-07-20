@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css'
 	import '../prism-laserwave.css'
+	import '../katex.css'
 	import { AppBar, Modal } from '@skeletonlabs/skeleton-svelte'
 	import { Menu, X } from 'lucide-svelte'
 	import Lightswitch from '$lib/components/utils/Lightswitch.svelte'
