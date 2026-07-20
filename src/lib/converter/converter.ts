@@ -39,9 +39,9 @@ import rehypeMermaidInk from './rehype-mermaid-ink'
 import rehypePermalinks from './rehype-permalinks'
 import { matter } from 'vfile-matter'
 import type { Frontmatter, Manifest } from '$lib/types'
-import { dirname, join } from 'path'
+import { join } from 'path'
 import { ASSETS_FOLDER } from '$lib/loading'
-import { existsSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import type { Root } from 'mdast'
 
 declare module 'vfile' {
