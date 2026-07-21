@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal } from '@skeletonlabs/skeleton-svelte'
+	import { Dialog } from '@skeletonlabs/skeleton-svelte'
 
 	interface Props {
 		url: string
@@ -13,7 +13,7 @@
 </script>
 
 <figure class={['py-4 text-center', url && baseClasses]}>
-	<Modal bind:open={modalState}>
+	<Dialog bind:open={modalState}>
 		{#snippet trigger()}
 			<img src={url} alt={caption} {width} class="max-h-[500px]" />
 		{/snippet}
@@ -30,7 +30,7 @@
 				{/if}
 			</figure>
 		{/snippet}
-	</Modal>
+	</Dialog>
 	{#if caption}
 		<figcaption
 			class="pre-html mx-auto self-center border-b-2 border-l-0 border-b-surface-500 pb-1"

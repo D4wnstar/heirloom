@@ -1,14 +1,7 @@
 import type { Config } from 'tailwindcss'
-import { contentPath, skeleton } from '@skeletonlabs/skeleton/plugin'
-import cosmos from './static/themes/cosmos'
 
 export default {
-	content: ['./src/**/*.{html,js,svelte,ts}', contentPath(import.meta.url, 'svelte')],
-	plugins: [
-		skeleton({
-			themes: [cosmos]
-		})
-	]
+	content: ['./src/**/*.{html,js,svelte,ts}']
 
 	// safelist: [
 	// 	{

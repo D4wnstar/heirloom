@@ -9,7 +9,7 @@
 
 code[class*='language-'],
 pre[class*='language-'] {
-	background-color: rgb(var(--color-surface-800)); /* Changed from #27212e */
+	background-color: var(--color-surface-900); /* Changed from #27212e */
 	color: #ffffff;
 	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* this is the default */
 	/* The following properties are standard, please leave them as they are */

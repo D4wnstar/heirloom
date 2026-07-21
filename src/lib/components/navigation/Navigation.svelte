@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Popover } from '@skeletonlabs/skeleton-svelte'
+	import { Popover, Portal } from '@skeletonlabs/skeleton-svelte'
 	import TreeFile from './TreeFile.svelte'
 	import TreeFolder from './TreeFolder.svelte'
 	import { onMount } from 'svelte'
@@ -7,12 +7,9 @@
 	import type { Tree } from '$lib/types'
 	import { LSVAR_NAVMENU_STATE } from '$lib/utils'
 
-	let { tree: treeProp }: { tree: Tree } = $props()
+	let { tree = $bindable() }: { tree: Tree } = $props()
 
-	// Tree needs to marked as state since props are by design non-reactive
-	let tree = $state(treeProp)
 	let searchQuery = $state('')
-	let popoverState = $state(false)
 	let autocompleteLinks: { title: string; slug: string }[] = $state([])
 
 	onMount(async () => loadExpandedStates(tree))
@@ -56,18 +53,17 @@
 
 	function searchInTree(searchTerm: string, tree: Tree) {
 		let namePathPairs: { title: string; slug: string }[] = []
-		searchTerm = searchTerm.toLocaleLowerCase()
-		for (const obj of tree) {
+		for (const node of tree) {
 			if (
-				obj.type === 'file' &&
-				obj.aliases.some((term) => term.toLocaleLowerCase().includes(searchTerm))
+				node.type === 'file' &&
+				node.aliases.some((term) => term.toLocaleLowerCase().includes(searchTerm))
 			) {
-				namePathPairs.push({ title: obj.title, slug: obj.slug })
+				namePathPairs.push({ title: node.title, slug: node.slug })
 				continue
 			}
 
-			if (obj.type === 'folder') {
-				const nestedPairs = searchInTree(searchTerm, [obj])
+			if (node.type === 'folder') {
+				const nestedPairs = searchInTree(searchTerm, node.children)
 				namePathPairs.push(...nestedPairs)
 			}
 		}
@@ -77,23 +73,17 @@
 
 	function autocomplete() {
 		if (searchQuery.length < 2) return
-		autocompleteLinks = searchInTree(searchQuery, tree)
-		popoverState = true
+		autocompleteLinks = searchInTree(searchQuery.toLocaleLowerCase(), tree)
+	}
+
+	function onNavigate() {
+		searchQuery = ''
+		autocompleteLinks = []
 	}
 </script>
 
-<header class="text-center type-scale-5"><b>Navigation</b></header>
-<hr class="border-surface-700-300" />
-
-<Popover
-	bind:open={popoverState}
-	positioning={{ placement: 'bottom' }}
-	contentBase="card bg-surface-200-800 p-4 space-y-4 max-w-[320px] z-10"
-	triggerClasses="w-full"
-	autoFocus={false}
-	portalled={false}
->
-	{#snippet trigger()}
+<Popover>
+	<Popover.Trigger class="w-full">
 		<input
 			type="text"
 			name="search"
@@ -103,28 +93,32 @@
 			bind:value={searchQuery}
 			oninput={autocomplete}
 		/>
-	{/snippet}
-	{#snippet content()}
-		<div class="flex w-full flex-col items-start space-y-2">
-			{#each autocompleteLinks as link}
-				<a
-					class="btn block w-full text-left hover:bg-surface-200-800"
-					href={`/pages/${link.slug}`}
-					onclick={() => (searchQuery = '')}>{link.title}</a
-				>
-			{/each}
-		</div>
-	{/snippet}
+	</Popover.Trigger>
+	<Portal>
+		<Popover.Positioner>
+			{#if autocompleteLinks.length > 0}
+				<Popover.Content class="card bg-surface-100-900 w-96 p-4 shadow-xl">
+					<div class="flex w-full flex-col items-start space-y-2">
+						{#each autocompleteLinks as link}
+							<Popover.CloseTrigger class="btn hover:preset-tonal block w-full text-left">
+								<a href={`/pages/${link.slug}`} onclick={onNavigate}>{link.title}</a>
+							</Popover.CloseTrigger>
+						{/each}
+					</div>
+				</Popover.Content>
+			{/if}
+		</Popover.Positioner>
+	</Portal>
 </Popover>
 
 <hr class="border-surface-700-300" />
 <div class="overflow-auto">
-	{#each tree as entry, idx (entry.path)}
+	{#each tree as node (node.path)}
 		<div>
-			{#if tree[idx].type === 'folder'}
-				<TreeFolder bind:folder={tree[idx]} {saveExpandedStates} />
+			{#if node.type === 'folder'}
+				<TreeFolder {...node} {saveExpandedStates} />
 			{:else}
-				<TreeFile title={tree[idx].title} slug={tree[idx].slug} />
+				<TreeFile {...node} />
 			{/if}
 		</div>
 	{/each}

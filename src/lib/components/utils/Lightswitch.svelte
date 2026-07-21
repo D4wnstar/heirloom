@@ -1,30 +1,36 @@
 <script lang="ts">
 	import { Switch } from '@skeletonlabs/skeleton-svelte'
-	import IconMoon from 'lucide-svelte/icons/moon'
-	import IconSun from 'lucide-svelte/icons/sun'
+	import { MoonIcon, SunIcon } from 'lucide-svelte'
 	import { onMount } from 'svelte'
 
-	let mode = $state(true)
+	let checked = $state(true)
 
-	// Handle the change in state when toggled.
-	function handleModeChange(newState: boolean) {
+	/** Flip light/dark mode on toggle. */
+	function onCheckedChange(newState: boolean) {
+		checked = newState
 		document.documentElement.classList.toggle('dark', newState)
 		localStorage.setItem('darkMode', String(newState))
 	}
 
 	onMount(() => {
 		// Initialize from localStorage (need browser so in onMount it goes)
-		mode = (localStorage.getItem('darkMode') ?? 'true') === 'true'
+		checked = (localStorage.getItem('darkMode') ?? 'true') === 'true'
 	})
 </script>
 
-<Switch
-	name="mode"
-	controlActive="bg-surface-500"
-	controlInactive="bg-surface-200"
-	checked={mode}
-	onCheckedChange={(e) => handleModeChange(e.checked)}
->
-	{#snippet activeChild()}<IconMoon size="14" />{/snippet}
-	{#snippet inactiveChild()}<IconSun size="14" />{/snippet}
+<Switch {checked} onCheckedChange={(e) => onCheckedChange(e.checked)}>
+	<Switch.Control
+		><Switch.Thumb>
+			<Switch.Context>
+				{#snippet children(switch_)}
+					{#if switch_().checked}
+						<MoonIcon class="size-3"></MoonIcon>
+					{:else}
+						<SunIcon class="size-3"></SunIcon>
+					{/if}
+				{/snippet}
+			</Switch.Context>
+		</Switch.Thumb></Switch.Control
+	>
+	<Switch.HiddenInput />
 </Switch>
