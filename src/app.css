@@ -1,6 +1,24 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import 'tailwindcss';
+
+@config '../tailwind.config.ts';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentcolor);
+	}
+}
 
 html,
 body {
@@ -34,7 +52,7 @@ a[href^="https://"]::after
 /* Styles for prerendered HTML */
 .pre-html {
 	* {
-		@apply break-words;
+		@apply wrap-break-word;
 	}
 
 	h1 {
@@ -68,7 +86,7 @@ a[href^="https://"]::after
 	}
 
 	a {
-		@apply anchor underline-offset-4 text-primary-800-200 hover:underline;
+		@apply anchor text-primary-800-200 underline-offset-4 hover:underline;
 	}
 
 	a.broken-link {
@@ -103,7 +121,7 @@ a[href^="https://"]::after
 
 	ul,
 	ol {
-		@apply list-outside space-y-1 pl-4 marker:text-surface-600-400;
+		@apply marker:text-surface-600-400 list-outside space-y-1 pl-4;
 	}
 
 	ul {
@@ -132,7 +150,7 @@ a[href^="https://"]::after
 
 	/* Callouts */
 	.callout {
-		@apply overflow-hidden rounded !bg-opacity-40 p-6 pt-4 bg-primary-50-950;
+		@apply bg-primary-50-950 overflow-hidden rounded p-6 pt-4;
 	}
 
 	.callout.collapsible {

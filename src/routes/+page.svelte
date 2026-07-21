@@ -108,7 +108,7 @@
 	<hr class="hr" />
 </main>
 
-<aside class="hidden w-[360px] [@media(min-width:1400px)]:block">
+<aside class="hidden w-90 [@media(min-width:1400px)]:block">
 	{#if data.sidebarImages.length > 0 || data.details.length > 0}
 		<Extras sidebarImages={data.sidebarImages} details={data.details} />
 	{/if}
