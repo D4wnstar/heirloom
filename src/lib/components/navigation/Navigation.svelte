@@ -6,6 +6,7 @@
     import { browser } from '$app/environment'
     import type { Tree, File } from '$lib/types'
     import { LSVAR_NAVMENU_STATE } from '$lib/utils'
+    import { resolve } from '$app/paths'
 
     let { tree }: { tree: Tree } = $props()
 
@@ -191,7 +192,7 @@
         const link = results[index]
         if (!link) return
         resetSearch()
-        goto(`/pages/${link.slug}`)
+        goto(resolve(`/pages/${link.slug}`))
     }
 
     /** Handle keyboard controls. */
@@ -277,7 +278,7 @@
                     <li>
                         <a
                             use:rememberOption={index}
-                            href={`/pages/${link.slug}`}
+                            href={resolve(`/pages/${link.slug}`)}
                             class="btn {index === highlighted
                                 ? 'preset-tonal'
                                 : 'hover:preset-tonal'} block w-full text-left"

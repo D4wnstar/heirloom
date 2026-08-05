@@ -6,6 +6,7 @@
     import { MenuIcon, XIcon } from 'lucide-svelte'
     import Lightswitch from '$lib/components/utils/Lightswitch.svelte'
     import Navigation from '$lib/components/navigation/Navigation.svelte'
+    import { resolve } from '$app/paths'
 
     let { children, data } = $props()
 </script>
@@ -44,7 +45,7 @@
 
         <!-- Title -->
         <AppBar.Headline>
-            <a href="/" class="text-2xl font-bold">
+            <a href={resolve('/')} class="text-2xl font-bold">
                 {data.projectSettings.title}
             </a>
         </AppBar.Headline>

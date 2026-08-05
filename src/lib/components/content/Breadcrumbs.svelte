@@ -8,7 +8,7 @@
 </script>
 
 <ol id="breadcrumbs" class="flex items-center gap-4 space-y-0 {classes} overflow-hidden">
-    {#each breadcrumbs.slice(0, -1) as crumb}
+    {#each breadcrumbs.slice(0, -1) as crumb (crumb)}
         <li class="line-clamp-1 opacity-40">{crumb}</li>
         <li class="opacity-30" aria-hidden={true}>&rsaquo;</li>
     {/each}

@@ -37,7 +37,7 @@ export type Detail =
     | { type: 'header'; header: string }
 
 export interface HeirloomDirectivesOptions {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line ts/no-explicit-any
     inlineTextProcessor: Processor<any, any, any, any, any>
     imageEmbedResolver: ImageEmbedResolver
 }

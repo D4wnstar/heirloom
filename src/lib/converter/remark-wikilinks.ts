@@ -385,7 +385,7 @@ export interface WikilinkOptions {
      * appropriate nodes. Be sure to not use `remark-rehype` as you want MDAST nodes.
      * If unset, the parent processor will pass itself.
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line ts/no-explicit-any
     pageEmbedProcessor?: Processor<any, any, any, any, any>
 }
 

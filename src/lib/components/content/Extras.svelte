@@ -13,7 +13,7 @@
 
 {#if sidebarImages.length > 0}
     <div id="sidebar-images" class="space-y-6">
-        {#each sidebarImages as img}
+        {#each sidebarImages as img (img.url)}
             <ImageWithModal url={img.url} caption={img.caption} />
         {/each}
     </div>

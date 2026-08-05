@@ -13,7 +13,7 @@
     <h3 class="h3"><Library class="inline" /> Details</h3>
     <table class="w-full">
         <tbody class="pre-html">
-            {#each details as detail}
+            {#each details as detail (detail)}
                 <tr>
                     {#if detail.type === 'key-value'}
                         <td class="px-1 align-text-top lg:min-w-[6em]">{@html detail.key}</td>
