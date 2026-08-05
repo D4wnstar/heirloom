@@ -131,7 +131,7 @@ export async function markdownToHtml(markdown: string, manifest: Manifest) {
 
 	// Image embed resolver for remark-wikilinks and remark-heirloom-directives
 	const imageEmbedResolver: ImageEmbedResolver = (target, extension) => {
-		const path = findPath(target, manifest.mediaPaths)
+        const path = findPath(target, manifest.mediaPaths)
 		if (!path) return null // TODO: Make a broken embed placeholder
 		return `/media/${path}`
 	}

@@ -9,27 +9,27 @@
 	}
 
 	let { url, caption, baseClasses, width }: Props = $props()
-	let modalState = $state(false)
 </script>
 
 <figure class={['py-4 text-center', url && baseClasses]}>
-	<Dialog bind:open={modalState}>
-		{#snippet trigger()}
-			<img src={url} alt={caption} {width} class="max-h-[500px]" />
-		{/snippet}
-		{#snippet content()}
-			<figure
-				class="flex max-h-[90vh] max-w-[80vw] flex-col items-center justify-center rounded p-4 bg-surface-100-900"
-			>
-				<img src={url} alt={caption} class="max-h-[80vh] max-w-[80vw] object-contain" />
-				{#if caption}
-					<hr class="hr my-4 border-surface-500" />
-					<figcaption class="text-center type-scale-3">
-						{@html caption}
-					</figcaption>
-				{/if}
-			</figure>
-		{/snippet}
+	<Dialog>
+		<Dialog.Trigger>
+			<img src={url} alt={caption} {width} class="max-h-125 cursor-pointer" />
+		</Dialog.Trigger>
+		<Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
+		<Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center p-4">
+			<Dialog.Content class="card bg-surface-100-900 w-full max-w-[80vh] max-h-[80vh] p-4 shadow-xl">
+				<figure>
+					<img src={url} alt={caption} class="object-contain" />
+					{#if caption}
+						<hr class="hr my-4 border-surface-500" />
+						<figcaption class="text-center type-scale-3">
+							{@html caption}  
+						</figcaption>
+					{/if}
+				</figure>
+			</Dialog.Content>
+		</Dialog.Positioner>
 	</Dialog>
 	{#if caption}
 		<figcaption

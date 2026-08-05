@@ -10,19 +10,15 @@
 		path: string
 		expanded: boolean
 		children: Tree
-		saveExpandedStates: () => void
+		isExpanded: (path: string) => boolean
+		toggle: (path: string) => void
 	}
-	let { title, path, expanded = $bindable(), children, saveExpandedStates }: Props = $props()
-
-	function toggle() {
-		expanded = !expanded
-		saveExpandedStates()
-	}
+	let { title, path, expanded, children, isExpanded, toggle }: Props = $props()
 </script>
 
 <button
 	class="group hover:bg-opacity-80! hover:text-primary-800-200 hover:bg-surface-50-950 flex w-full flex-row items-center gap-2 rounded-none py-1 duration-200 hover:pl-2"
-	onclick={toggle}
+	onclick={() => toggle(path)}
 	aria-expanded={expanded}
 	aria-controls={`folder-${path}`}
 >
@@ -39,7 +35,12 @@
 		{#each children as child (child.path)}
 			<li class="pl-1">
 				{#if child.type === 'folder'}
-					<TreeFolder {...child} {saveExpandedStates} />
+					<TreeFolder
+						{...child}
+						expanded={isExpanded(child.path)}
+						isExpanded={isExpanded}
+						toggle={toggle}
+					/>
 				{:else}
 					<TreeFile {...child} />
 				{/if}

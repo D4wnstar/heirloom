@@ -7,49 +7,41 @@
 	import type { Tree } from '$lib/types'
 	import { LSVAR_NAVMENU_STATE } from '$lib/utils'
 
-	let { tree = $bindable() }: { tree: Tree } = $props()
+	let { tree }: { tree: Tree } = $props()
 
 	let searchQuery = $state('')
 	let autocompleteLinks: { title: string; slug: string }[] = $state([])
 
-	onMount(async () => loadExpandedStates(tree))
+	// Open/closed folder state lives here, keyed by folder path
+    // Persisted to localStorage on change for persisten navbar state
+    // across full reloads/navigations
+	let expanded = $state<Record<string, boolean>>({})
+
+	function isExpanded(path: string) {
+		return expanded[path] ?? false
+	}
+
+	function toggle(path: string) {
+		expanded[path] = !isExpanded(path)
+		saveExpandedStates()
+	}
 
 	function saveExpandedStates() {
 		if (!browser) return
-
-		const states: Record<string, boolean> = {}
-		const collectStates = (items: Tree) => {
-			for (const item of items) {
-				// Save only open folders, everything else is default closed anyway
-				if (item.type === 'folder' && item.expanded) {
-					states[item.path] = item.expanded
-					collectStates(item.children)
-				}
-			}
-		}
-		collectStates(tree)
-		localStorage.setItem(LSVAR_NAVMENU_STATE, JSON.stringify(states))
+		localStorage.setItem(LSVAR_NAVMENU_STATE, JSON.stringify(expanded))
 	}
 
-	function loadExpandedStates(content: Tree) {
+	onMount(() => {
 		if (!browser) return
-
 		const saved = localStorage.getItem(LSVAR_NAVMENU_STATE)
 		if (!saved) return
-
-		const states: Record<string, boolean> = JSON.parse(saved)
-		const applyStates = (items: Tree) => {
-			for (const item of items) {
-				if (item.type === 'folder') {
-					if (states[item.path] !== undefined) {
-						item.expanded = states[item.path]
-					}
-					applyStates(item.children)
-				}
-			}
+		try {
+			expanded = JSON.parse(saved)
+		} catch {
+			// malformed saved state, ignore
+            console.warn("Navigation open/closed state was malformed, resetting...")
 		}
-		applyStates(content)
-	}
+	})
 
 	function searchInTree(searchTerm: string, tree: Tree) {
 		let namePathPairs: { title: string; slug: string }[] = []
@@ -116,7 +108,12 @@
 	{#each tree as node (node.path)}
 		<div>
 			{#if node.type === 'folder'}
-				<TreeFolder {...node} {saveExpandedStates} />
+				<TreeFolder
+					{...node}
+					expanded={isExpanded(node.path)}
+					isExpanded={isExpanded}
+					toggle={toggle}
+				/>
 			{:else}
 				<TreeFile {...node} />
 			{/if}
