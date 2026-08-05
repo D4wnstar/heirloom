@@ -12,17 +12,17 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkStringify from 'remark-stringify'
 import { matter } from 'vfile-matter'
 import type {
-	Folder,
-	File,
-	Tree,
-	ProjectSettings,
-	Frontmatter,
-	Manifest
+    Folder,
+    File,
+    Tree,
+    ProjectSettings,
+    Frontmatter,
+    Manifest,
 } from '../src/lib/types.ts'
 
 if (!existsSync(assetsDir)) {
-	console.error('Error: No assets directory when making manifest')
-	process.exit(1)
+    console.error('Error: No assets directory when making manifest')
+    process.exit(1)
 }
 
 // Instantiate all directories to ensure parents exist before children
@@ -36,34 +36,34 @@ const { fileMetadata, publishedFolderPaths } = collectFileMetadata(entries, asse
 // and paths to routes for wikilink generation
 const slugsToPaths = resolveSlugs(fileMetadata)
 const pathsToRoutes = Object.fromEntries(
-	Object.entries(slugsToPaths).map(([slug, path]) => [path, '/pages/' + slug])
+    Object.entries(slugsToPaths).map(([slug, path]) => [path, '/pages/' + slug]),
 )
 const mediaPaths = entries
-	.filter((e) => e.isFile() && !e.name.endsWith('.md'))
-	.map((e) => `${relative(assetsDir, e.parentPath)}${path.sep}${e.name}`)
+    .filter((e) => e.isFile() && !e.name.endsWith('.md'))
+    .map((e) => `${relative(assetsDir, e.parentPath)}${path.sep}${e.name}`)
 
 // Set settings and the navigation tree
 const projectSettings: ProjectSettings = {
-	title: 'My Heirloom Project',
-	frontPage: { path: '' },
-	allowMermaidInk: false
+    title: 'My Heirloom Project',
+    frontPage: { path: '' },
+    allowMermaidInk: false,
 }
 
 for (const { file, frontmatter, relPathParent } of fileMetadata) {
-	if (frontmatter['hl-frontpage'] === true) {
-		// The front page contains the project settings
-		// All settings have defaults so this just updates them if needed
-		if (frontmatter['hl-project-title']) projectSettings.title = frontmatter['hl-project-title']
-		if (frontmatter['hl-allow-mermaid-ink'])
-			projectSettings.allowMermaidInk = frontmatter['hl-allow-mermaid-ink']
+    if (frontmatter['hl-frontpage'] === true) {
+        // The front page contains the project settings
+        // All settings have defaults so this just updates them if needed
+        if (frontmatter['hl-project-title']) projectSettings.title = frontmatter['hl-project-title']
+        if (frontmatter['hl-allow-mermaid-ink'])
+            projectSettings.allowMermaidInk = frontmatter['hl-allow-mermaid-ink']
 
-		// Store the front page separately
-		projectSettings.frontPage = { path: file.path }
-	} else {
-		// Normal pages are added to the nav tree
-		const parent = folders.get(relPathParent) ?? root
-		parent.children.push(file)
-	}
+        // Store the front page separately
+        projectSettings.frontPage = { path: file.path }
+    } else {
+        // Normal pages are added to the nav tree
+        const parent = folders.get(relPathParent) ?? root
+        parent.children.push(file)
+    }
 }
 
 sortTree(root.children)
@@ -71,17 +71,17 @@ sortTree(root.children)
 pruneEmptyFolders(root, publishedFolderPaths)
 
 if (projectSettings.frontPage.path === '') {
-	console.error('Error: No front page is set. Cannot build the website without a front page')
-	process.exit(1)
+    console.error('Error: No front page is set. Cannot build the website without a front page')
+    process.exit(1)
 }
 
 // Aggregate everything and save
 const manifest: Manifest = {
-	projectSettings,
-	slugsToPaths,
-	pathsToRoutes,
-	mediaPaths,
-	navTree: root.children
+    projectSettings,
+    slugsToPaths,
+    pathsToRoutes,
+    mediaPaths,
+    navTree: root.children,
 }
 
 writeFileSync(join(assetsDir, 'manifest.json'), JSON.stringify(manifest))
@@ -89,89 +89,89 @@ console.log('Successfully created manifest at assets/manifest.json')
 
 /* FUNCTIONS */
 function collectFileTree(rootPath: string) {
-	const root: Folder = {
-		type: 'folder',
-		title: 'Root',
-		path: '',
-		children: [],
-		expanded: true
-	}
-	const folders = new Map<string, Folder>([['', root]])
+    const root: Folder = {
+        type: 'folder',
+        title: 'Root',
+        path: '',
+        children: [],
+        expanded: true,
+    }
+    const folders = new Map<string, Folder>([['', root]])
 
-	const entries = readdirSync(rootPath, { recursive: true, withFileTypes: true })
-	for (const entry of entries) {
-		if (!entry.isDirectory()) continue
+    const entries = readdirSync(rootPath, { recursive: true, withFileTypes: true })
+    for (const entry of entries) {
+        if (!entry.isDirectory()) continue
 
-		// Paths should be relative to the assets folder
-		const absPath = join(entry.parentPath, entry.name)
-		const relPath = relative(rootPath, absPath)
-		const relPathParent = relative(rootPath, entry.parentPath)
+        // Paths should be relative to the assets folder
+        const absPath = join(entry.parentPath, entry.name)
+        const relPath = relative(rootPath, absPath)
+        const relPathParent = relative(rootPath, entry.parentPath)
 
-		const folder: Folder = {
-			type: 'folder',
-			title: entry.name,
-			path: relPath,
-			children: [],
-			expanded: false
-		}
-		folders.set(relPath, folder)
+        const folder: Folder = {
+            type: 'folder',
+            title: entry.name,
+            path: relPath,
+            children: [],
+            expanded: false,
+        }
+        folders.set(relPath, folder)
 
-		const parent = folders.get(relPathParent) ?? root
-		parent.children.push(folder)
-	}
+        const parent = folders.get(relPathParent) ?? root
+        parent.children.push(folder)
+    }
 
-	return { root, folders, entries }
+    return { root, folders, entries }
 }
 
 function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
-	const processor = unified()
-		.use(remarkParse)
-		.use(remarkFrontmatter, { type: 'yaml', marker: '-' })
-		.use(() => (_, file) => matter(file))
-		.use(remarkStringify)
+    const processor = unified()
+        .use(remarkParse)
+        .use(remarkFrontmatter, { type: 'yaml', marker: '-' })
+        .use(() => (_, file) => matter(file))
+        .use(remarkStringify)
 
-	const fileMetadata: FileMeta[] = []
-	const publishedFolderPaths = new Set<string>()
+    const fileMetadata: FileMeta[] = []
+    const publishedFolderPaths = new Set<string>()
 
-	for (const entry of entries) {
-		// Skip hidden files and folders and anything that's not a markdown file
-		if (
-			entry.name.startsWith('.') ||
-			entry.parentPath.split(path.sep).some((p) => p.startsWith('.')) ||
-			!entry.isFile() ||
-			!entry.name.endsWith('.md')
-		) {
-			continue
-		}
+    for (const entry of entries) {
+        // Skip hidden files and folders and anything that's not a markdown file
+        if (
+            entry.name.startsWith('.') ||
+            entry.parentPath.split(path.sep).some((p) => p.startsWith('.')) ||
+            !entry.isFile() ||
+            !entry.name.endsWith('.md')
+        ) {
+            continue
+        }
 
-		const absPath = join(entry.parentPath, entry.name)
-		const relPath = relative(rootPath, absPath)
-		const relPathParent = relative(rootPath, entry.parentPath)
+        const absPath = join(entry.parentPath, entry.name)
+        const relPath = relative(rootPath, absPath)
+        const relPathParent = relative(rootPath, entry.parentPath)
 
-		const content = readFileSync(absPath, { encoding: 'utf-8' })
-		const vfile = processor.processSync(content)
-		const frontmatter = vfile.data.matter as Frontmatter
+        const content = readFileSync(absPath, { encoding: 'utf-8' })
+        const vfile = processor.processSync(content)
+        const frontmatter = vfile.data.matter as Frontmatter
 
-		// Skip unpublished files
-		if (frontmatter['hl-publish'] !== true) continue
+        // Skip unpublished files
+        if (frontmatter['hl-publish'] !== true) continue
 
-		const file: File = {
-			type: 'file',
-			title: entry.name.replace(/\.md$/, ''),
-			path: relPath,
-			slug: '', // Made in resolveSlugs
-			aliases: frontmatter.aliases ?? []
-		}
+        const file: File = {
+            type: 'file',
+            title: entry.name.replace(/\.md$/, ''),
+            path: relPath,
+            slug: '', // Made in resolveSlugs
+            aliases: frontmatter.aliases ?? [],
+        }
 
-		fileMetadata.push({ file, frontmatter, relPathParent })
+        fileMetadata.push({ file, frontmatter, relPathParent })
 
-		// Track folder as having published content
-		publishedFolderPaths.add(relPathParent)
-		for (const part of relPathParent.split(path.sep)) {
-			if (part.length > 0) publishedFolderPaths.add(part)
-		}
-	}
-	return { fileMetadata, publishedFolderPaths }
+        // Track folder as having published content
+        publishedFolderPaths.add(relPathParent)
+        for (const part of relPathParent.split(path.sep)) {
+            if (part.length > 0) publishedFolderPaths.add(part)
+        }
+    }
+    return { fileMetadata, publishedFolderPaths }
 }
 
 /**
@@ -189,87 +189,87 @@ function collectFileMetadata(entries: Dirent<string>[], rootPath: string) {
  * @returns A map of slugs to their file path. Also modifies File items in place.
  */
 function resolveSlugs(items: FileMeta[]): Record<string, string> {
-	const slugsToPath: Record<string, string> = {}
-	const usedSlugs = new Set<string>()
+    const slugsToPath: Record<string, string> = {}
+    const usedSlugs = new Set<string>()
 
-	// Group by slug to notice duplicates
-	const groups = items
-		.filter((item) => item.frontmatter['hl-frontpage'] !== true)
-		.reduce((groups, item) => {
-			const slug = slugTransform(item.file.title)
-			if (!groups.has(slug)) groups.set(slug, [])
-			groups.get(slug)!.push(item)
-			return groups
-		}, new Map<string, FileMeta[]>())
+    // Group by slug to notice duplicates
+    const groups = items
+        .filter((item) => item.frontmatter['hl-frontpage'] !== true)
+        .reduce((groups, item) => {
+            const slug = slugTransform(item.file.title)
+            if (!groups.has(slug)) groups.set(slug, [])
+            groups.get(slug)!.push(item)
+            return groups
+        }, new Map<string, FileMeta[]>())
 
-	for (const [slug, group] of groups) {
-		if (group.length === 1) {
-			// If unique slug, just use it
-			group[0].file.slug = slug
-		} else {
-			// If duplicate filenames, disambiguate
-			for (const item of group) {
-				let disambiguation: string
+    for (const [slug, group] of groups) {
+        if (group.length === 1) {
+            // If unique slug, just use it
+            group[0].file.slug = slug
+        } else {
+            // If duplicate filenames, disambiguate
+            for (const item of group) {
+                let disambiguation: string
 
-				if (item.frontmatter['hl-disambiguation']) {
-					disambiguation = slugTransform(item.frontmatter['hl-disambiguation'])
-				} else {
-					// Generate disambiguation from file path, e.g. "Docs/Nesting" -> "Docs_Nesting"
-					const parts = item.relPathParent
-						.split(path.sep)
-						.filter((p) => p.length > 0)
-						.map((part) => slugTransform(part))
-					disambiguation = parts.length > 0 ? parts.join('_') : 'Root'
-				}
+                if (item.frontmatter['hl-disambiguation']) {
+                    disambiguation = slugTransform(item.frontmatter['hl-disambiguation'])
+                } else {
+                    // Generate disambiguation from file path, e.g. "Docs/Nesting" -> "Docs_Nesting"
+                    const parts = item.relPathParent
+                        .split(path.sep)
+                        .filter((p) => p.length > 0)
+                        .map((part) => slugTransform(part))
+                    disambiguation = parts.length > 0 ? parts.join('_') : 'Root'
+                }
 
-				const candidateSlug = `${slug}_(${disambiguation})`
+                const candidateSlug = `${slug}_(${disambiguation})`
 
-				// Handle name collisions (e.g. manual disambiguations conflicts)
-				let suffix = 1
-				let finalSlug = candidateSlug
-				while (usedSlugs.has(finalSlug)) {
-					finalSlug = `${candidateSlug}_${suffix}`
-					suffix += 1
-				}
+                // Handle name collisions (e.g. manual disambiguations conflicts)
+                let suffix = 1
+                let finalSlug = candidateSlug
+                while (usedSlugs.has(finalSlug)) {
+                    finalSlug = `${candidateSlug}_${suffix}`
+                    suffix += 1
+                }
 
-				item.file.slug = finalSlug
-			}
-		}
+                item.file.slug = finalSlug
+            }
+        }
 
-		// Save slugs
-		for (const item of group) {
-			if (usedSlugs.has(item.file.slug)) {
-				console.error(
-					`Error: Duplicate slug '${item.file.slug}' generated for ${item.file.path}. Skipping...`
-				)
-				continue
-			}
-			slugsToPath[item.file.slug] = item.file.path
-			usedSlugs.add(item.file.slug)
-		}
-	}
+        // Save slugs
+        for (const item of group) {
+            if (usedSlugs.has(item.file.slug)) {
+                console.error(
+                    `Error: Duplicate slug '${item.file.slug}' generated for ${item.file.path}. Skipping...`,
+                )
+                continue
+            }
+            slugsToPath[item.file.slug] = item.file.path
+            usedSlugs.add(item.file.slug)
+        }
+    }
 
-	return slugsToPath
+    return slugsToPath
 }
 
 /**
  * Run string transformations to meet slug formatting.
  */
 function slugTransform(title: string) {
-	return encodeURIComponent(title.replaceAll(/\s/g, '_'))
+    return encodeURIComponent(title.replaceAll(/\s/g, '_'))
 }
 
 /**
  * Order a tree folders first, then alphabetical.
  */
 function sortTree(tree: Tree) {
-	tree.sort((a, b) => {
-		if (a.type !== b.type) return a.type === 'folder' ? -1 : 1
-		return a.title.localeCompare(b.title)
-	})
-	for (const item of tree) {
-		if (item.type === 'folder') sortTree(item.children)
-	}
+    tree.sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'folder' ? -1 : 1
+        return a.title.localeCompare(b.title)
+    })
+    for (const item of tree) {
+        if (item.type === 'folder') sortTree(item.children)
+    }
 }
 
 /**
@@ -278,19 +278,19 @@ function sortTree(tree: Tree) {
  * (tracked in publishedFolderPaths) or contains a subfolder with published content.
  */
 function pruneEmptyFolders(folder: Folder, publishedFolderPaths: Set<string>) {
-	for (let i = folder.children.length - 1; i >= 0; i--) {
-		const child = folder.children[i]
-		if (child.type === 'folder') {
-			pruneEmptyFolders(child, publishedFolderPaths)
-			if (child.children.length === 0 && !publishedFolderPaths.has(child.path)) {
-				folder.children.splice(i, 1)
-			}
-		}
-	}
+    for (let i = folder.children.length - 1; i >= 0; i--) {
+        const child = folder.children[i]
+        if (child.type === 'folder') {
+            pruneEmptyFolders(child, publishedFolderPaths)
+            if (child.children.length === 0 && !publishedFolderPaths.has(child.path)) {
+                folder.children.splice(i, 1)
+            }
+        }
+    }
 }
 
 interface FileMeta {
-	file: File
-	frontmatter: Frontmatter
-	relPathParent: string
+    file: File
+    frontmatter: Frontmatter
+    relPathParent: string
 }

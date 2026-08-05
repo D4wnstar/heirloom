@@ -3,10 +3,10 @@
 // and what to do when importing types
 
 declare global {
-	namespace App {
-		// interface Locals {}
-		// interface PageData {}
-		// interface Error {}
-		// interface Platform {}
-	}
+    namespace App {
+        // interface Locals {}
+        // interface PageData {}
+        // interface Error {}
+        // interface Platform {}
+    }
 }

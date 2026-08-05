@@ -5,83 +5,83 @@ import type { Root } from 'mdast'
 import type { Plugin } from 'unified'
 
 declare module 'micromark-util-types' {
-	interface TokenTypeMap {
-		comment: 'comment'
-	}
+    interface TokenTypeMap {
+        comment: 'comment'
+    }
 }
 
 const commentTokenize: Tokenizer = function (effects, ok, nok) {
-	return start
+    return start
 
-	function start(code: Code) {
-		effects.enter('comment')
-		effects.consume(code)
-		return startConfirm
-	}
+    function start(code: Code) {
+        effects.enter('comment')
+        effects.consume(code)
+        return startConfirm
+    }
 
-	function startConfirm(code: Code) {
-		// Guarantee a double opening equals
-		if (code === codes.percentSign) {
-			effects.consume(code)
-			return inside
-		}
-		return nok(code)
-	}
+    function startConfirm(code: Code) {
+        // Guarantee a double opening equals
+        if (code === codes.percentSign) {
+            effects.consume(code)
+            return inside
+        }
+        return nok(code)
+    }
 
-	function inside(code: Code) {
-		// Cancel if EOF
-		if (code === null) return nok(code)
+    function inside(code: Code) {
+        // Cancel if EOF
+        if (code === null) return nok(code)
 
-		// Escaped percent characters are ignored
-		if (code === codes.backslash) {
-			const attempt = effects.attempt(escapePercentConstruct, inside, (code) => {
-				// Invalid escape, consider the backslash as regular text and proceed
-				effects.consume(code)
-				return inside
-			})
-			return attempt(code)
-		}
+        // Escaped percent characters are ignored
+        if (code === codes.backslash) {
+            const attempt = effects.attempt(escapePercentConstruct, inside, (code) => {
+                // Invalid escape, consider the backslash as regular text and proceed
+                effects.consume(code)
+                return inside
+            })
+            return attempt(code)
+        }
 
-		// Possible closing percent
-		if (code === codes.percentSign) {
-			// Guarantee a double closing percent
-			const attempt = effects.attempt(
-				doublePercentConstruct,
-				(code) => {
-					// If it's double, close
-					effects.consume(code)
-					return close
-				},
-				(code) => {
-					// If it's single, ignore it and proceed
-					effects.consume(code)
-					return inside
-				}
-			)
-			return attempt(code)
-		}
+        // Possible closing percent
+        if (code === codes.percentSign) {
+            // Guarantee a double closing percent
+            const attempt = effects.attempt(
+                doublePercentConstruct,
+                (code) => {
+                    // If it's double, close
+                    effects.consume(code)
+                    return close
+                },
+                (code) => {
+                    // If it's single, ignore it and proceed
+                    effects.consume(code)
+                    return inside
+                },
+            )
+            return attempt(code)
+        }
 
-		// Regular character
-		effects.consume(code)
-		return inside
-	}
+        // Regular character
+        effects.consume(code)
+        return inside
+    }
 
-	function close(code: Code) {
-		effects.consume(code)
-		effects.exit('comment')
-		return ok
-	}
+    function close(code: Code) {
+        effects.consume(code)
+        effects.exit('comment')
+        return ok
+    }
 }
 
 const escapePercentConstruct = makeDoubleCharConstruct(
-	'highlightEscape',
-	codes.backslash,
-	codes.percentSign
+    'highlightEscape',
+    codes.backslash,
+    codes.percentSign,
 )
 const doublePercentConstruct = makeDoubleCharConstruct(
-	'highlightClose',
-	codes.percentSign,
-	codes.percentSign
+    'highlightClose',
+    codes.percentSign,
+    codes.percentSign,
 )
 
 const commentConstruct: Construct = { name: 'comment', tokenize: commentTokenize }
@@ -93,11 +93,11 @@ export const comments: Extension = { text: { [codes.percentSign]: commentConstru
  * wrapped in double `%` characters.
  */
 const remarkComments: Plugin<[], Root> = function () {
-	const data = this.data()
+    const data = this.data()
 
-	// Register extension
-	const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
-	micromarkExts.push(comments)
+    // Register extension
+    const micromarkExts = data.micromarkExtensions || (data.micromarkExtensions = [])
+    micromarkExts.push(comments)
 }
 
 export default remarkComments

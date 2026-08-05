@@ -1,50 +1,50 @@
 <script lang="ts">
-	import type { Tree } from '$lib/types'
-	import { ChevronDown } from 'lucide-svelte'
-	import TreeFile from './TreeFile.svelte'
-	import TreeFolder from './TreeFolder.svelte'
-	import { slide } from 'svelte/transition'
+    import type { Tree } from '$lib/types'
+    import { ChevronDown } from 'lucide-svelte'
+    import TreeFile from './TreeFile.svelte'
+    import TreeFolder from './TreeFolder.svelte'
+    import { slide } from 'svelte/transition'
 
-	interface Props {
-		title: string
-		path: string
-		expanded: boolean
-		children: Tree
-		isExpanded: (path: string) => boolean
-		toggle: (path: string) => void
-	}
-	let { title, path, expanded, children, isExpanded, toggle }: Props = $props()
+    interface Props {
+        title: string
+        path: string
+        expanded: boolean
+        children: Tree
+        isExpanded: (path: string) => boolean
+        toggle: (path: string) => void
+    }
+    let { title, path, expanded, children, isExpanded, toggle }: Props = $props()
 </script>
 
 <button
-	class="group hover:bg-opacity-80! hover:text-primary-800-200 hover:bg-surface-50-950 flex w-full flex-row items-center gap-2 rounded-none py-1 duration-200 hover:pl-2"
-	onclick={() => toggle(path)}
-	aria-expanded={expanded}
-	aria-controls={`folder-${path}`}
+    class="group hover:bg-opacity-80! hover:text-primary-800-200 hover:bg-surface-50-950 flex w-full flex-row items-center gap-2 rounded-none py-1 duration-200 hover:pl-2"
+    onclick={() => toggle(path)}
+    aria-expanded={expanded}
+    aria-controls={`folder-${path}`}
 >
-	<ChevronDown
-		class="min-w-8 duration-200 group-hover:opacity-100 {expanded
-			? 'rotate-0'
-			: '-rotate-90 opacity-50'}"
-	/>
-	<span class="grow text-left">{title}</span>
+    <ChevronDown
+        class="min-w-8 duration-200 group-hover:opacity-100 {expanded
+            ? 'rotate-0'
+            : '-rotate-90 opacity-50'}"
+    />
+    <span class="grow text-left">{title}</span>
 </button>
 
 {#if expanded}
-	<ul transition:slide={{ duration: 300 }} class="pl-1" id={`folder-${path}`}>
-		{#each children as child (child.path)}
-			<li class="pl-1">
-				{#if child.type === 'folder'}
-					<TreeFolder
-						{...child}
-						expanded={isExpanded(child.path)}
-						isExpanded={isExpanded}
-						toggle={toggle}
-					/>
-				{:else}
-					<TreeFile {...child} />
-				{/if}
-			</li>
-		{/each}
-	</ul>
+    <ul transition:slide={{ duration: 300 }} class="pl-1" id={`folder-${path}`}>
+        {#each children as child (child.path)}
+            <li class="pl-1">
+                {#if child.type === 'folder'}
+                    <TreeFolder
+                        {...child}
+                        expanded={isExpanded(child.path)}
+                        {isExpanded}
+                        {toggle}
+                    />
+                {:else}
+                    <TreeFile {...child} />
+                {/if}
+            </li>
+        {/each}
+    </ul>
 {/if}

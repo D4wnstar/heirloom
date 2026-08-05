@@ -12,19 +12,19 @@ export const MANIFEST_PATH = join(ASSETS_FOLDER, 'manifest.json')
  * @returns The processed page object with HTML content
  */
 export async function fetchPage(filepath: string, manifest: Manifest) {
-	const assetPath = join(ASSETS_FOLDER, filepath)
-	console.debug('PROCESSING:', assetPath)
+    const assetPath = join(ASSETS_FOLDER, filepath)
+    console.debug('PROCESSING:', assetPath)
 
-	const markdownContent = readFileSync(assetPath, 'utf-8')
-	const { html, title, sidebarImages, details } = await markdownToHtml(markdownContent, manifest)
+    const markdownContent = readFileSync(assetPath, 'utf-8')
+    const { html, title, sidebarImages, details } = await markdownToHtml(markdownContent, manifest)
 
-	const titleFromPath = filepath.split(path.sep).at(-1)?.replace(/\.md$/, '') ?? 'Placeholder'
+    const titleFromPath = filepath.split(path.sep).at(-1)?.replace(/\.md$/, '') ?? 'Placeholder'
 
-	return {
-		html,
-		title: title ?? titleFromPath,
-		path: filepath,
-		sidebarImages,
-		details
-	}
+    return {
+        html,
+        title: title ?? titleFromPath,
+        path: filepath,
+        sidebarImages,
+        details,
+    }
 }

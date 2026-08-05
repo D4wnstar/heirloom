@@ -16,7 +16,7 @@ hl-publish: true
 
 ###### Header 6
 
-### *Formatted* ==heading==
+### _Formatted_ ==heading==
 
 ### With $\mathbf{y}=m\mathbf{x}+q$ math
 
@@ -46,9 +46,10 @@ hl-publish: true
 > Then back to normal.
 
 ## Lists
+
 - You've seen this above
     - But have you seen nesting?
-        - A *lot* of nesting
+        - A _lot_ of nesting
 - Then back to normal
 
 1. Same for numbers
@@ -59,42 +60,46 @@ hl-publish: true
 - Mixed lists?
     1. We have them
     - Even at the same nesting level
+
 1. They don't quite mix at top level though
 
 - [ ] Task list also work.
 - [ ] This one is incomplete.
 - [x] This has been completed.
-	- [ ] Subtasks are supported
-	- [x] Complete or incomplete
+    - [ ] Subtasks are supported
+    - [x] Complete or incomplete
 - [ ] Last thing
 
 * You can use asterisks for unordered lists too
-  * Nested or otherwise
-  - Mixing is a bit funky though, try to keep consistent
+    - Nested or otherwise
+    * Mixing is a bit funky though, try to keep consistent
+
 - Like this
 
 ## Horizontal lines
+
 Using ---, ___ and \*\*\*
 
 ---
 
-___
+---
 
-***
+---
 
 Same, but with spaces in between, like - - -, _ _ _ and \* \* \*
 
-- - -
+---
 
-_ _ _
+---
 
-* * *
+---
 
 ## Tables
-| First name | Last name                 | Field               |
-| ---------- | ------------------------- | ------------------- |
-| Max        | Born                      | *Physics*           |
-| Marie      | Curie                     | *Chemistry*         |
+
+| First name | Last name | Field       |
+| ---------- | --------- | ----------- |
+| Max        | Born      | _Physics_   |
+| Marie      | Curie     | _Chemistry_ |
 
 | Left-aligned text | Center-aligned text | Right-aligned text |
 | :---------------- | :-----------------: | -----------------: |
@@ -111,7 +116,7 @@ Besides syntax highlighting, of course
 ```
 
 ```javascript
-const text = "JavaScript"
+const text = 'JavaScript'
 console.log(`This is a code block in ${text}`)
 // Prints: This is a code block in JavaScript
 ```
@@ -129,30 +134,33 @@ println!("This is a code block in {text}");
 ```
 
 ## Footnotes
+
 This is a footnote, see bottom of the page.[^1]
 
 And a second one.[^2]
 
-This is an *inline* footnote.^[Yet another reference.]
+This is an _inline_ footnote.^[Yet another reference.]
 
 ## Callouts
+
 Callouts use the Obsidian syntax.
 
 > [!info] Callouts!
-> Content with *actual* formatting inside.
+> Content with _actual_ formatting inside.
 
 > [!info]
 > Default callout titles also work.
 
-> [!info] Empty *callout*
+> [!info] Empty _callout_
 
 > [!info]
 
-> [!example] Annoying *callout*
+> [!example] Annoying _callout_
+>
 > > Nested blockquote to start
 
-> [!example] Another annoying *callout*
-> 
+> [!example] Another annoying _callout_
+>
 > Empty newline to start
 
 > [!info]- Unfold me!
@@ -160,12 +168,15 @@ Callouts use the Obsidian syntax.
 
 > [!question] Question
 > Nested callouts work too
+>
 > > [!info] Nested!
 > > See?
-> > > [!quote]- Nested *and* foldable!
-> > > It *just* works.
+> >
+> > > [!quote]- Nested _and_ foldable!
+> > > It _just_ works.
 
 ## Math
+
 A **harmonic oscillator** is a system with an equilibrium point that, after undergoing a perturbation, experiences a restoring force $\mathbf{F}$ proportional to the displacement distance $\mathbf{x}$ according to **Hooke's law**:
 $$\mathbf{F}=-k\mathbf{x}$$
 with $k$ being a positive constant called the **spring constant**. In the small angle approximation, it solves analytically to
@@ -182,7 +193,9 @@ $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\ome
 > It's a linear relation.
 
 # Links
+
 ## Regular
+
 - [[Wave equation]] (regular)
 - [[Wave equation#Introduction to waves]] (section)
 - [[Wave equation|Wavefunction]] (alias)
@@ -191,15 +204,19 @@ $$\boxed{x(t)=x_{0}\cos(\omega t)+ \frac{v_{0}}{\omega}\sin(\omega t)=A\cos(\ome
 - [[#Callouts|Cool syntax]] (internal section + alias)
 
 ## Embeds
+
 ### Pages
+
 ![[Block syntax]]
 
 ![[Wave equation#Introduction to waves]]
 
 ### Media
+
 ![[Cat.jpg|300]]
 
 # Mermaid graphs
+
 ```mermaid
 sequenceDiagram
     Alice->>+John: Hello John, how are you?
@@ -255,7 +272,6 @@ classDiagram
     }
 
 ```
-
 
 [^1]: You found the reference!
 

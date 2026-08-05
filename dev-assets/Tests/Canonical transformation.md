@@ -1,9 +1,10 @@
 ---
 hl-publish: true
 aliases:
-  - conjugate Hamiltonian
-  - univalent canonical transformation
+    - conjugate Hamiltonian
+    - univalent canonical transformation
 ---
+
 A **canonical transformation** is a [[coordinate transformation]] that transforms a set of [[canonical coordinates]] that satisfy the [[Hamilton equations|Hamilton equations]] into another set that also satisfies them. It is said that canonical transformations **preserve the form** of the Hamilton equations.
 
 Mathematically, the transformation $q_{i}=u_{i}(\tilde{q},\tilde{p},t)$, $p_{i}=v_{i}(\tilde{q},\tilde{p},t)$ is canonical if for all [[Hamiltonian|Hamiltonians]] $H(q,p,t)$, there exists a function $K(\tilde{q},\tilde{p},t)$ called the **conjugate Hamiltonian** such that, if the equations of motion in coordinates $(q,p)$ obey the Hamilton equations
@@ -11,16 +12,20 @@ $$\dot{p}_{i}=-\frac{ \partial H }{ \partial q_{i} },\quad  \dot{q}_{i}=\frac{ \
 then the equations in $(\tilde{q},\tilde{p})$ also obey the Hamilton equations, with $K$ as the Hamiltonian:
 $$\dot{\tilde{p}}_{i}=-\frac{ \partial K }{ \partial \tilde{q}_{i} },\quad\dot{\tilde{q}}_{i}=\frac{ \partial K }{ \partial \tilde{p}_{i} }$$
 The solutions are related by the functions $u$ and $v$ as $q_{i}(t)=u_{i}(\tilde{q}(t),\tilde{p}(t),t)$ and $p_{i}(t)=v_{i}(\tilde{q}(t),\tilde{p}(t),t)$.
+
 ### Interpretation
+
 Being a special case of coordinate transformations, canonical transformations warrant a special interpretation. Say we have some transformation $\mathbf{x}=\mathbf{w}(\tilde{\mathbf{x}},t)$. What are $\mathbf{x}$ and $\tilde{\mathbf{x}}$? They are canonical coordinates and therefore points in [[phase space]]. What's the relation between them? There's a couple of ways we can see the pair $(\mathbf{x},\tilde{\mathbf{x}})$:
-1. $\mathbf{x}$ and $\tilde{\mathbf{x}}$ are coordinates of two *different* points in the *same* coordinate system.
-2. $\mathbf{x}$ and $\tilde{\mathbf{x}}$ are coordinates of the *same* point in two *different* coordinate systems.
+
+1. $\mathbf{x}$ and $\tilde{\mathbf{x}}$ are coordinates of two _different_ points in the _same_ coordinate system.
+2. $\mathbf{x}$ and $\tilde{\mathbf{x}}$ are coordinates of the _same_ point in two _different_ coordinate systems.
 
 It's easier to see an example.
 
 > [!example] Rotation on a plane
 > Consider a generic 2D [[rotation]] as a canonical coordinate transformation between $(x,y)$ and $(\tilde{x},\tilde{y})$:
-> $$\begin{pmatrix}
+>
+> $$ \begin{pmatrix}
 > x \\ y
 > \end{pmatrix}=\begin{pmatrix}
 > \cos \alpha & -\sin \alpha \\ \sin \alpha & \cos \alpha
@@ -28,19 +33,23 @@ It's easier to see an example.
 > \tilde{x} \\ \tilde{y}
 > \end{pmatrix}$$
 > We can see this in two ways.
-> 
+>
 > ![[Plot Rotation coordinate change interpretations.svg]]
-> 
+>
 > 1. On the left, we see the transformation as moving the point from the blue point to the red point.
 > 2. On the right, we see the transformation rotating the axes themselves from blue to red. Note how the rotation goes in the *opposite* direction here.
+> $$
 
 In this sense, we can interpret canonical transformations in one of two ways:
-1. *Actively*, as moving the points from an old location to a new location.
-2. *Passively*, as letting the points stay where they are and moving the axes instead, in the opposite direction of the points.
+
+1. _Actively_, as moving the points from an old location to a new location.
+2. _Passively_, as letting the points stay where they are and moving the axes instead, in the opposite direction of the points.
 
 In a way, both are intuitive, but the active interpretation is particularly convenient when working with single-parameter families of canonical transformations, such as the [[Hamiltonian flow]] or the aforementioned rotations.
+
 ### Canonicity criteria
-Determining if a transformation is canonical can be arduous: you have to prove that it is canonical for *all* possible Hamiltonians, and there's infinite of them. Sometimes this brute force way is a valid approach, such as in some of the examples below, but there is a better method to ensuring canonicity. For a transformation to be canonical, it must satisfy the so-called **canonicity criteria**.
+
+Determining if a transformation is canonical can be arduous: you have to prove that it is canonical for _all_ possible Hamiltonians, and there's infinite of them. Sometimes this brute force way is a valid approach, such as in some of the examples below, but there is a better method to ensuring canonicity. For a transformation to be canonical, it must satisfy the so-called **canonicity criteria**.
 
 Assume we're working for some [[dynamical system]] $\dot{\mathbf{x}}=f(\mathbf{x},t)$. Consider a generic coordinate transformation $x_{i}=w_{i}(\tilde{\mathbf{x}},t)$. The inverse is $\tilde{x}_{i}=\tilde{w}_{i}(\mathbf{x},t)$. Motion in [[phase space]] is described by either $x_{i}(t)$ or $\tilde{x}_{i}(t)$, linked by the aforementioned equations as $x_{i}(t)=w(\tilde{\mathbf{x}}(t),t)$ and $\tilde{x}_{i}(t)=\tilde{w}(\mathbf{x}(t),t)$. The [[Differential|total time derivative]] is
 $$\dot{\tilde{x}}_{i}=\sum_{j=1}^{n} \underbrace{ \frac{ \partial \tilde{w}_{i} }{ \partial x_{j} } }_{ \tilde{J}_{ij} } (\mathbf{x}(t),t)\dot{x}_{j}(t)+\frac{ \partial \tilde{w} }{ \partial t } (\mathbf{x}(t),t)$$
@@ -60,14 +69,15 @@ If the transformation is canonical, then this must also be equal to $\dot{\tilde
 > In particular, we call $K_{0}$ the conjugate Hamiltonian when $H=0$, that is
 > $$\frac{ \partial \tilde{\mathbf{w}} }{ \partial t }=\mathrm{E}\nabla_{\tilde{\mathbf{x}}}K_{0} $$
 
-The issue now is that we don't really know what $K$ *is*. We'll start from $\mathrm{E}\nabla_{\mathbf{x}}K$ and see what we can do.
+The issue now is that we don't really know what $K$ _is_. We'll start from $\mathrm{E}\nabla_{\mathbf{x}}K$ and see what we can do.
 $$\mathrm{E}\nabla_{\tilde{\mathbf{x}}}K=\tilde{J}\mathrm{E}\nabla_{\mathbf{x}}H+\frac{ \partial \tilde{\mathbf{w}} }{ \partial t } =\tilde{J}\mathrm{E}\tilde{J}^{T}(\tilde{J}^{T})^{-1}\nabla_{\mathbf{x}}H+\mathrm{E}\nabla_{\tilde{\mathbf{x}}}K_{0}=\ldots$$
 In the first step, we used the first part of the canonicity lemma. In the second, we used the second part of the lemma and we arbitrarily added $\tilde{J}^{T}(\tilde{J}^{T})^{-1}$ since a [[matrix]] multiplied by its [[Invertible matrix|inverse]] is the [[identity matrix]] and doesn't change anything. It's a weird step, but it allows us to use the following equality. First, notice that, since $\tilde{J}^{-1}=J$, $(\tilde{J}^{T})^{-1}=(\tilde{J}^{-1})^{T}=J^{T}$. Then
-$$\begin{align}
+
+$$ \begin{align}
 ((\tilde{J}^{T})^{-1} \nabla_{\mathbf{x}}H)_{i}&=\sum_{j}J_{ij}^{T}\frac{ \partial H }{ \partial x_{j} } \\
 (\text{symmetric: }J^{T}_{ij}=J_{ji})&=\sum_{j}J_{ji}\frac{ \partial H }{ \partial x_{j} } \\
 \left( \text{def: }J_{ji}=\frac{ \partial w_{j} }{ \partial \tilde{x}_{i} }  \right)&=\sum_{j}\frac{ \partial w_{j} }{ \partial \tilde{x}_{i} } \frac{ \partial H }{ \partial x_{j} } \\
-(\text{def: }H(w(\tilde{x},t),t)\equiv\tilde{H}(\tilde{x},t))&=\frac{ \partial \tilde{H} }{ \partial \tilde{x}_{i} } 
+(\text{def: }H(w(\tilde{x},t),t)\equiv\tilde{H}(\tilde{x},t))&=\frac{ \partial \tilde{H} }{ \partial \tilde{x}_{i} }
 \end{align}$$
 The last step uses the [[chain rule]]. In vector form:
 $$(\tilde{J}^{T})^{-1}\nabla_{\mathbf{x}}H=\nabla_{\tilde{\mathbf{x}}}\tilde{H}$$
@@ -96,7 +106,7 @@ This is the *general* shape of the conjugate Hamiltonian. In the special case wh
 > We now apply $J$ to the left and $J^{T}$ to the right on both sides
 > $$J\tilde{J}\mathrm{E}\tilde{J}^{T}J^{T}=cJ\mathrm{E}J^{T}\quad\Rightarrow \quad \mathrm{E}=cJ\mathrm{E}\tilde{J}$$
 > since $J=\tilde{J}^{-1}$ and so $J\tilde{J}=\tilde{J}^{T}J^{T}=\mathrm{I}_{2n}$.
-> 
+>
 > $(\Leftarrow)$ If $c\neq 0$ exists, then the transformation must be canonical, that is, for all $H$ there exists some $K$ such that $E\nabla_{\tilde{\mathbf{x}}}K=\tilde{J}\mathrm{E}\nabla_{\mathbf{x}}H+\frac{ \partial \tilde{ \mathbf{w}} }{ \partial t }$ (part 1 of canonicity lemma). We already know that $\nabla_{\mathbf{x}}H=\tilde{J}^{T}\nabla_{\tilde{\mathbf{x}}}\tilde{H}$ so
 > $$\tilde{J}\mathrm{E}\nabla_{\mathbf{x}}H=\tilde{J}\mathrm{E}\tilde{J}^{T}\nabla_{\tilde{\mathbf{x}}}\tilde{H}=c\mathrm{E}\nabla_{\tilde{\mathbf{x}}}\tilde{H}$$
 > With two more lemmas that won't be covered here, one can prove that if $K_{0}$ exists such that $\mathrm{E}\nabla_{\tilde{\mathbf{x}}}K_{0}=\frac{ \partial \tilde{\mathbf{w}} }{ \partial t }$ (part 2 of canonicity lemma), then there exists a $K$ such that the canonicity lemma is valid and thus the transformation is canonical.
@@ -184,7 +194,7 @@ This can use the following lemma:
 > ($\Rightarrow$). Start from $\Omega$:
 > $$\frac{ \partial f_{i} }{ \partial x_{j} } =\sum_{k}E_{ik} \frac{ \partial ^{2}F }{ \partial x_{k}x_{j} } \quad\Rightarrow \quad \Omega=\mathrm{E}(\partial ^{2}F)$$
 > which is only true if $\mathrm{E}\Omega$ is antisymmetric.
-> 
+>
 > ($\Leftarrow$). Define $\mathbf{u}\equiv \mathrm{E}\mathbf{f}$. Then
 > $$\frac{ \partial u }{ \partial x } =\mathrm{E}\Omega$$
 > means that $\mathrm{E}\Omega$ is symmetrical. Then
@@ -297,9 +307,9 @@ This is because $\lvert \mathbf{p} \rvert^{2}$, $\lvert \mathbf{q} \rvert^{2}$ a
 > &=\sum_{i,j}(\epsilon_{kij}q_{j}p_{i}+\epsilon_{kij}p_{i}q_{j})=\sum_{i,j}\epsilon_{kij}(q_{j}p_{i}+p_{i}q_{j})=0
 > \end{align}$$
 > because again, $e_{kij}$ is antisymmetric and the term in brackets is symmetric.
-> 
+>
 > Since $\{ L_{k},\lvert \mathbf{p} \rvert^{2} \}=\{ L_{k},\lvert \mathbf{q} \rvert^{2} \}=\{ L_{k},\mathbf{p}\cdot \mathbf{q} \}=0$, all three of these are invariant under rotation and completes our proof.
-> 
+>
 > As further confirmation, we can also prove that $f$ is invariant by calculating the Poisson brackets directly using the chain rule:
 > $$\begin{align}
 > \{ L_{k},f \}&=\sum_{i}\left( \frac{ \partial L_{k} }{ \partial q_{i} } \frac{ \partial f }{ \partial p_{i} } -\frac{ \partial L_{k} }{ \partial p_{i} } \frac{ \partial f }{ \partial q_{i} }  \right) \\
@@ -326,7 +336,7 @@ This is because $\lvert \mathbf{p} \rvert^{2}$, $\lvert \mathbf{q} \rvert^{2}$ a
 > This is correct, but we have not proven if this is a canonical transformation or not. To do so, we need to check if these new equations of motions take the form of Hamilton equations for some Hamiltonian $K$:
 > $$\begin{cases}
 > \dot{\tilde{p}}=\omega \tilde{p}\cos \tilde{q}\sin \tilde{q}=-\frac{ \partial K }{ \partial \tilde{q} }  \\
-> \dot{\tilde{q}}=\omega \cos ^{2}\tilde{q}=\frac{ \partial K }{ \partial \tilde{p} } 
+> \dot{\tilde{q}}=\omega \cos ^{2}\tilde{q}=\frac{ \partial K }{ \partial \tilde{p} }
 > \end{cases}\quad(?)\tag{1}$$
 > We need some property to verify that such a $K$ can exist. Since we're working with derivatives, we may as well use the [[Schwarz theorem]] as a check. The following must be true:
 > $$\frac{ \partial  }{ \partial \tilde{p} } \frac{ \partial K }{ \partial \tilde{q} } =\frac{ \partial  }{ \partial \tilde{q} } \frac{ \partial K }{ \partial \tilde{p} } $$
@@ -359,12 +369,12 @@ This is because $\lvert \mathbf{p} \rvert^{2}$, $\lvert \mathbf{q} \rvert^{2}$ a
 > By the criterion we calculate
 > $$J\mathrm{E}J^{T}=\begin{pmatrix}1 & 0 \\ \alpha t & 1\end{pmatrix}\begin{pmatrix}0 & -1 \\ 1 & 0\end{pmatrix}\begin{pmatrix}1 & \alpha t \\ 0 & 1\end{pmatrix}=\begin{pmatrix}0 & -1 \\ 1 & -\alpha t\end{pmatrix}\begin{pmatrix}1 & \alpha t \\ 0  &  1\end{pmatrix}=\begin{pmatrix}0 & -1 \\ 1 & 0\end{pmatrix}=\mathrm{E}$$
 > So the transformation is not only canonical, but also univalent (since $c=1$). Thus, $w$ is a symplectic transformation.
-> 
+>
 > We can also find this out by using the second canonicity criterion. We just need to prove that the Poisson brackets are preserved. The fundamental Poisson brackets are
 > $$\{ \tilde{q}+\alpha t\tilde{p},\tilde{p} \}=\{ \tilde{q},\tilde{p} \}+\alpha t\cancel{ \{ \tilde{p},\tilde{p} \} }=1$$
 > $$\{ \tilde{q}+\alpha t\tilde{p},\tilde{q}+\alpha t\tilde{p} \}=\cancel{ \{ \tilde{q},\tilde{q} \} }+\{ \tilde{q},\alpha t\tilde{p} \}+\{ \alpha t\tilde{p},\tilde{q} \}+\{ \alpha t\tilde{p},\alpha t\tilde{q} \}=0$$
 > (TODO: Finish this, 13/05/2025 end of lesson)
-> 
+>
 > According the first criterion, there exists some $K_{0}$ for which $K=cH+K_{0}$. We now that $K=\tilde{H}+K_{0}$. The condition is that $\mathrm{E}\nabla_{\tilde{x}}K_{0}=\frac{ \partial \tilde{w} }{ \partial t }$, which means $\nabla_{\tilde{x}}K_{0}=-\mathrm{E}\frac{ \partial \tilde{w} }{ \partial t }$. We can calculate $\frac{ \partial \tilde{w} }{ \partial t }$, so let's do that first:
 > $$\frac{ \partial \tilde{w} }{ \partial t }=\begin{pmatrix}0 \\ -\alpha t\end{pmatrix}$$
 > The gradient of $K_{0}$ must therefore be
@@ -380,3 +390,4 @@ This is because $\lvert \mathbf{p} \rvert^{2}$, $\lvert \mathbf{q} \rvert^{2}$ a
 [^2]: So important in fact that the entire field of symplectic geometry spawned as a consequence of the development of Hamiltonian mechanics.
 
 [^3]: It's canonical because any transformation like $\mathbf{p}=\alpha \tilde{\mathbf{p}}$, $\mathbf{q}=\beta \tilde{\mathbf{q}}$ is canonical, and this one is $\mathbf{p}=\sqrt{ \lvert c \rvert }\ \mathbf{p}'$ and $\mathbf{q}=\sqrt{ \lvert c \rvert }\ \mathbf{q}'$. See the examples.
+$$

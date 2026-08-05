@@ -9,6 +9,6 @@ import type { Manifest } from '$lib/types'
 export const prerender = true
 
 export const load = (async () => {
-	const manifestJson = readFileSync(MANIFEST_PATH, { encoding: 'utf-8' })
-	return JSON.parse(manifestJson) as Manifest
+    const manifestJson = readFileSync(MANIFEST_PATH, { encoding: 'utf-8' })
+    return JSON.parse(manifestJson) as Manifest
 }) satisfies LayoutServerLoad

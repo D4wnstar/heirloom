@@ -1,19 +1,19 @@
 <!doctype html>
 <html data-theme="cosmos">
-	<script>
-		// Apply dark mode before rendering to prevent flash
-		const savedMode = (localStorage.getItem('darkMode') ?? 'true') === 'true'
-		document.documentElement.classList.toggle('dark', savedMode)
-	</script>
+    <script>
+        // Apply dark mode before rendering to prevent flash
+        const savedMode = (localStorage.getItem('darkMode') ?? 'true') === 'true'
+        document.documentElement.classList.toggle('dark', savedMode)
+    </script>
 
-	<head>
-		<meta charset="utf-8" />
+    <head>
+        <meta charset="utf-8" />
         <meta name="color-scheme" content="light dark" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width" />
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents" class="h-full overflow-hidden">%sveltekit.body%</div>
-	</body>
+        <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+        <meta name="viewport" content="width=device-width" />
+        %sveltekit.head%
+    </head>
+    <body data-sveltekit-preload-data="hover">
+        <div style="display: contents" class="h-full overflow-hidden">%sveltekit.body%</div>
+    </body>
 </html>

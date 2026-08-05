@@ -11,18 +11,18 @@ import type { Plugin } from 'unified'
  * markdown content.
  */
 const remarkHeadingIds: Plugin<[], Root> = function () {
-	return function (tree: Root) {
-		visit(tree, 'heading', (node) => {
-			const value = dumpLiteralValues(node)
-			if (!node.data) {
-				node.data = { hProperties: { id: value } }
-			} else if (!node.data.hProperties) {
-				node.data.hProperties = { id: value }
-			} else {
-				node.data.hProperties.id = value
-			}
-		})
-	}
+    return function (tree: Root) {
+        visit(tree, 'heading', (node) => {
+            const value = dumpLiteralValues(node)
+            if (!node.data) {
+                node.data = { hProperties: { id: value } }
+            } else if (!node.data.hProperties) {
+                node.data.hProperties = { id: value }
+            } else {
+                node.data.hProperties.id = value
+            }
+        })
+    }
 }
 
 export default remarkHeadingIds

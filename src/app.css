@@ -16,229 +16,228 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-	*,
-	::after,
-	::before,
-	::backdrop,
-	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
-	}
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentcolor);
+    }
 }
 
 html,
 body {
-	@apply h-full;
+    @apply h-full;
 }
 
 /* Icon after external links */
-a[href^="http"]::after,
-a[href^="https://"]::after
-{
-	@apply ml-1;
-	display: inline-block;
-	content: '↗';
-	font-weight: bold;
+a[href^='http']::after,
+a[href^='https://']::after {
+    @apply ml-1;
+    display: inline-block;
+    content: '↗';
+    font-weight: bold;
 }
 
 /* Styles for prerendered HTML */
 .pre-html {
-	* {
-		@apply wrap-break-word;
-	}
+    * {
+        @apply wrap-break-word;
+    }
 
-	h1 {
-		position: relative;
-		@apply h1;
-	}
+    h1 {
+        position: relative;
+        @apply h1;
+    }
 
-	h2 {
-		position: relative;
-		@apply h2;
-	}
+    h2 {
+        position: relative;
+        @apply h2;
+    }
 
-	h3 {
-		position: relative;
-		@apply h3;
-	}
+    h3 {
+        position: relative;
+        @apply h3;
+    }
 
-	h4 {
-		position: relative;
-		@apply h4;
-	}
+    h4 {
+        position: relative;
+        @apply h4;
+    }
 
-	h5 {
-		position: relative;
-		@apply h5;
-	}
+    h5 {
+        position: relative;
+        @apply h5;
+    }
 
-	h6 {
-		position: relative;
-		@apply h6;
-	}
+    h6 {
+        position: relative;
+        @apply h6;
+    }
 
-	a {
-		@apply anchor text-primary-800-200 underline-offset-4 hover:underline;
-	}
+    a {
+        @apply anchor text-primary-800-200 underline-offset-4 hover:underline;
+    }
 
-	a.broken-link {
-		@apply text-error-800-200;
-	}
+    a.broken-link {
+        @apply text-error-800-200;
+    }
 
-	a.permalink {
-		font-weight: lighter;
-		position: absolute;
-		left: calc(-0.5em - 1.5rem);
-		opacity: 0%;
-		transition: opacity 0.2s;
-		@apply text-surface-900-100;
-	}
+    a.permalink {
+        font-weight: lighter;
+        position: absolute;
+        left: calc(-0.5em - 1.5rem);
+        opacity: 0%;
+        transition: opacity 0.2s;
+        @apply text-surface-900-100;
+    }
 
-	h1:hover a.permalink,
-	h2:hover a.permalink,
-	h3:hover a.permalink,
-	h4:hover a.permalink,
-	h5:hover a.permalink,
-	h6:hover a.permalink {
-		opacity: 50%;
-	}
+    h1:hover a.permalink,
+    h2:hover a.permalink,
+    h3:hover a.permalink,
+    h4:hover a.permalink,
+    h5:hover a.permalink,
+    h6:hover a.permalink {
+        opacity: 50%;
+    }
 
-	/* code {
+    /* code {
 		@apply code;
 	} */
 
-	blockquote {
-		@apply blockquote space-y-4 not-italic;
-	}
+    blockquote {
+        @apply blockquote space-y-4 not-italic;
+    }
 
-	ul,
-	ol {
-		@apply marker:text-surface-600-400 list-outside space-y-1 pl-4;
-	}
+    ul,
+    ol {
+        @apply marker:text-surface-600-400 list-outside space-y-1 pl-4;
+    }
 
-	ul {
-		@apply list-disc;
-	}
+    ul {
+        @apply list-disc;
+    }
 
-	ol {
-		@apply list-decimal;
-	}
+    ol {
+        @apply list-decimal;
+    }
 
-	ul.contains-task-list {
-		@apply list-none;
-	}
+    ul.contains-task-list {
+        @apply list-none;
+    }
 
-	hr {
-		@apply hr;
-	}
+    hr {
+        @apply hr;
+    }
 
-	table {
-		@apply table;
-	}
+    table {
+        @apply table;
+    }
 
-	img {
-		@apply mx-auto;
-	}
+    img {
+        @apply mx-auto;
+    }
 
-	/* Callouts */
-	.callout {
-		@apply bg-primary-50-950 overflow-hidden rounded p-6 pt-4;
-	}
+    /* Callouts */
+    .callout {
+        @apply bg-primary-50-950 overflow-hidden rounded p-6 pt-4;
+    }
 
-	.callout.collapsible {
-		@apply transition-all;
-	}
+    .callout.collapsible {
+        @apply transition-all;
+    }
 
-	.callout.collapsed {
-		@apply space-y-0 py-4;
-	}
+    .callout.collapsed {
+        @apply space-y-0 py-4;
+    }
 
-	.callout-title {
-		@apply flex items-start gap-2 font-bold;
-	}
+    .callout-title {
+        @apply flex items-start gap-2 font-bold;
+    }
 
-	.callout.collapsible .callout-title {
-		@apply cursor-pointer;
-	}
+    .callout.collapsible .callout-title {
+        @apply cursor-pointer;
+    }
 
-	.callout.collapsible .callout-fold svg {
-		@apply -rotate-90 transition-transform;
-	}
+    .callout.collapsible .callout-fold svg {
+        @apply -rotate-90 transition-transform;
+    }
 
-	.callout-content {
-		@apply mt-4 space-y-4;
-	}
+    .callout-content {
+        @apply mt-4 space-y-4;
+    }
 
-	/* Callout colors */
-	.callout[data-callout='info'],
-	.callout[data-callout='todo'] {
-		@apply bg-primary-50-950/30;
+    /* Callout colors */
+    .callout[data-callout='info'],
+    .callout[data-callout='todo'] {
+        @apply bg-primary-50-950/30;
 
-		.callout-title {
-			@apply text-primary-500;
-		}
-	}
+        .callout-title {
+            @apply text-primary-500;
+        }
+    }
 
-	.callout[data-callout='abstract'],
-	.callout[data-callout='tip'],
-	.callout[data-callout='hint'],
-	.callout[data-callout='important'] {
-		@apply bg-secondary-50-950/30;
+    .callout[data-callout='abstract'],
+    .callout[data-callout='tip'],
+    .callout[data-callout='hint'],
+    .callout[data-callout='important'] {
+        @apply bg-secondary-50-950/30;
 
-		.callout-title {
-			@apply text-secondary-500;
-		}
-	}
+        .callout-title {
+            @apply text-secondary-500;
+        }
+    }
 
-	.callout[data-callout='example'] {
-		@apply bg-tertiary-50-950/30;
+    .callout[data-callout='example'] {
+        @apply bg-tertiary-50-950/30;
 
-		.callout-title {
-			@apply text-tertiary-500;
-		}
-	}
+        .callout-title {
+            @apply text-tertiary-500;
+        }
+    }
 
-	.callout[data-callout='success'],
-	.callout[data-callout='check'],
-	.callout[data-callout='done'] {
-		@apply bg-success-50-950/30;
+    .callout[data-callout='success'],
+    .callout[data-callout='check'],
+    .callout[data-callout='done'] {
+        @apply bg-success-50-950/30;
 
-		.callout-title {
-			@apply text-success-500;
-		}
-	}
+        .callout-title {
+            @apply text-success-500;
+        }
+    }
 
-	.callout[data-callout='question'],
-	.callout[data-callout='help'],
-	.callout[data-callout='faq'],
-	.callout[data-callout='warning'],
-	.callout[data-callout='caution'],
-	.callout[data-callout='attention'] {
-		@apply bg-warning-50-950/30;
+    .callout[data-callout='question'],
+    .callout[data-callout='help'],
+    .callout[data-callout='faq'],
+    .callout[data-callout='warning'],
+    .callout[data-callout='caution'],
+    .callout[data-callout='attention'] {
+        @apply bg-warning-50-950/30;
 
-		.callout-title {
-			@apply text-warning-500;
-		}
-	}
+        .callout-title {
+            @apply text-warning-500;
+        }
+    }
 
-	.callout[data-callout='failure'],
-	.callout[data-callout='fail'],
-	.callout[data-callout='missing'],
-	.callout[data-callout='danger'],
-	.callout[data-callout='error'],
-	.callout[data-callout='bug'] {
-		@apply bg-error-50-950/30;
+    .callout[data-callout='failure'],
+    .callout[data-callout='fail'],
+    .callout[data-callout='missing'],
+    .callout[data-callout='danger'],
+    .callout[data-callout='error'],
+    .callout[data-callout='bug'] {
+        @apply bg-error-50-950/30;
 
-		.callout-title {
-			@apply text-error-500;
-		}
-	}
+        .callout-title {
+            @apply text-error-500;
+        }
+    }
 
-	.callout[data-callout='quote'],
-	.callout[data-callout='cite'] {
-		@apply bg-surface-500/30;
+    .callout[data-callout='quote'],
+    .callout[data-callout='cite'] {
+        @apply bg-surface-500/30;
 
-		.callout-title {
-			@apply text-surface-800-200;
-		}
-	}
+        .callout-title {
+            @apply text-surface-800-200;
+        }
+    }
 }
