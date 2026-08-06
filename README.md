@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Heirloom** is a static site generator designed for simplicity and permanence. Content is plain markdown, stored in a regular git repository, and rendered to static HTML through the [unified](https://unifiedjs.com/) ecosystem. The built website has zero external runtime dependencies, vendor-locking and is suitable for running on any static site host whatsoever (or even locally).
+**Heirloom** is a static site generator designed for simplicity and permanence. Content is plain markdown, stored in a regular git repository, and rendered to static HTML through the [unified](https://unifiedjs.com/) ecosystem. The built website has zero external runtime dependencies or vendor-locking and is suitable for running on any static site host whatsoever (or even locally).
 
 Markdown syntax or transformation support can be added or removed as simply as adding or removing a unified plugin in the code. Moreover, since the markdown source of a Heirloom website is just an ordinary git repository, collaborating on writing and editing the website's content is the same as collaborating on any other git project.
 
